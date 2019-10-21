@@ -8,7 +8,7 @@ WPI Major Qualifying Project 2019-2020
 
 ## Install Instructions
 
-## Update Git Submodules
+### Update Git Submodules
 - Run terminal in the repo root
 - Update git submodules
 ```
@@ -53,7 +53,7 @@ rosrun rosserial_arduino make_libraries.py .
 - Open the MainProc project in PlatformIO
 - Plug in and upload the project to a Teensy 4.0
 
-## Add Teensy UDEV Rules
+### Add Teensy UDEV Rules
 - Copy text from: https://www.pjrc.com/teensy/49-teensy.rules
 - Place file in: /etc/udev/rules.d/49-teensy.rules:
 ```
@@ -63,7 +63,7 @@ sudo gedit 49-teensy.rules
 ```
 - Reboot your PC for the change to take effect
 
-## Test Teensy ROS Communication
+### Test Teensy ROS Communication
 - Make sure the Teensy is still plugged in
 - View the USB ports with:
 ```
@@ -78,7 +78,7 @@ rostopic hz /calibrated
 ```
 - The topic should be published at 10Hz
 
-## Install Baxter Simulator
+### Install Baxter Simulator
 - Install package dependencies:
 ```
 sudo apt-get install gazebo7 ros-kinetic-qt-build ros-kinetic-gazebo-ros-control ros-kinetic-gazebo-ros-pkgs ros-kinetic-ros-control ros-kinetic-control-toolbox ros-kinetic-realtime-tools ros-kinetic-ros-controllers ros-kinetic-xacro python-wstool ros-kinetic-tf-conversions ros-kinetic-kdl-parser
@@ -103,7 +103,7 @@ gedit baxter/baxter.sh
 ```
 - Change 'your_ip' on line 26 to "127.0.0.1"
 
-## Test Simulator with Teensy
+### Test Simulator with Teensy
 - Make sure the Teensy is still plugged in
 - Run in terminal:
 ```
