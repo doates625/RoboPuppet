@@ -11,7 +11,7 @@ These instructions are exclusively for ROS Kinetic on Ubuntu 16.04.
 
 ### Update Git Submodules
 - Run terminal in the repo root
-- Update git submodules
+- Update git submodules:
 ```
 git submodule update --init
 ```
@@ -98,13 +98,13 @@ cd ..
 source /opt/ros/kinetic/setup.bash
 catkin_make
 ```
-- Open Baxter startup script
+- Open Baxter startup script:
 ```
 gedit baxter/baxter.sh
 ```
 - Change 'your_ip' on line 26 to "127.0.0.1"
 - Change 'ros_version' on line 30 to "kinetic"
-- Open RoboPuppet launch file
+- Open RoboPuppet launch file:
 ```
 gedit robopuppet/launch/RoboPuppet.xml
 ```
