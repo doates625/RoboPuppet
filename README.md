@@ -7,6 +7,7 @@ WPI Major Qualifying Project 2019-2020
 - Tabby Gibbs
 
 ## Install Instructions
+These instructions are exclusively for ROS Kinetic on Ubuntu 16.04.
 
 ### Update Git Submodules
 - Run terminal in the repo root
@@ -97,11 +98,17 @@ cd ..
 source /opt/ros/kinetic/setup.bash
 catkin_make
 ```
-- Open baxter.sh
+- Open Baxter startup script
 ```
 gedit baxter/baxter.sh
 ```
 - Change 'your_ip' on line 26 to "127.0.0.1"
+- Change 'ros_version' on line 30 to "kinetic"
+- Open RoboPuppet launch file
+```
+gedit robopuppet/launch/RoboPuppet.xml
+```
+- Change value="..." on line 13 to PORT
 
 ### Test Simulator with Teensy
 - Make sure the Teensy is still plugged in
