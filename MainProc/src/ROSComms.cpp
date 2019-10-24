@@ -74,7 +74,7 @@ namespace ROSComms
 	void opmode_callback(const std_msgs::UInt8& msg);
 	ros::Subscriber<std_msgs::UInt8> sub_opmode("opmode", &opmode_callback);
 
-#if defined(BAXTER_REP_TEST)
+#if defined(BAXTER_STUB_DEMO)
 	// Rep Test Parameters
 	const float rep_time = 4.0f;
 	const uint32_t flip_count = (rep_time / 2.0f) / Robot::t_ros_s;
@@ -131,7 +131,7 @@ void ROSComms::update()
 	msg_calibrated.data = is_calibrated;
 	pub_calibrated.publish(&msg_calibrated);
 
-#if !defined(BAXTER_REP_TEST)
+#if !defined(BAXTER_STUB_DEMO)
 
 	// Copy arm angle and gripper data with ISRs disabled
 	cli();

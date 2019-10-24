@@ -112,6 +112,9 @@ gedit robopuppet/launch/RoboPuppet.xml
 
 ### Test Simulator with Teensy
 - Make sure the Teensy is still plugged in
+- Open the MainProc project in Platformio and open platformio.ini
+- Uncomment the BAXTER_STUB_DEMO directive under build_flags
+- Build and upload the project to the Teensy
 - Run in terminal:
 ```
 source devel/setup.bash
@@ -124,3 +127,4 @@ roslaunch robopuppet RoboPuppet.xml
 rostopic echo /robot/state
 ```
 - The state topic should be publishing at 100Hz
+- If everything was done correctly, Baxter should be periodically raising and lowering its arms every few seconds
