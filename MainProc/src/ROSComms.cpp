@@ -31,7 +31,7 @@ namespace ROSComms
 
 #if defined(BAXTER_STUB_DEMO)
 	// Rep Test Parameters
-	const float rep_time = 4.0f;
+	const float rep_time = 6.0f;
 	const uint32_t flip_count = (rep_time / 2.0f) / Robot::t_ros_s;
 	uint32_t update_count = 0;
 	bool curl_up = true;

@@ -16,44 +16,6 @@ These instructions are exclusively for ROS Kinetic on Ubuntu 16.04.
 git submodule update --init
 ```
 
-### Install ROS Arduino Library
-- Run in terminal:
-```
-cd CppDeps
-rosrun rosserial_arduino make_libraries.py .
-```
-- Open CppDeps/ros_lib/ArduinoHardware.h
-- Delete lines 44-63:
-```
-#if defined(__MK20DX128__) || defined(__MK20DX256__) || defined(__MK64FX512__) || defined(__MK66FX1M0__) || defined(__MKL26Z64__)
-  #if defined(USE_TEENSY_HW_SERIAL)
-    #define SERIAL_CLASS HardwareSerial // Teensy HW Serial
-  #else
-    #include <usb_serial.h>  // Teensy 3.0 and 3.1
-    #define SERIAL_CLASS usb_serial_class
-  #endif
-#elif defined(_SAM3XA_)
-  #include <UARTClass.h>  // Arduino Due
-  #define SERIAL_CLASS UARTClass
-#elif defined(USE_USBCON)
-  // Arduino Leonardo USB Serial Port
-  #define SERIAL_CLASS Serial_
-#elif (defined(__STM32F1__) and !(defined(USE_STM32_HW_SERIAL))) or defined(SPARK) 
-  // Stm32duino Maple mini USB Serial Port
-  #define SERIAL_CLASS USBSerial
-#else 
-  #include <HardwareSerial.h>  // Arduino AVR
-  #define SERIAL_CLASS HardwareSerial
-#endif
-```
-- Replace deleted code with:
-```
-#include <usb_serial.h>
-#define SERIAL_CLASS usb_serial_class
-```
-- Open the MainProc project in PlatformIO
-- Plug in and upload the project to a Teensy 4.0
-
 ### Add Teensy UDEV Rules
 - Copy text from: https://www.pjrc.com/teensy/49-teensy.rules
 - Place file in: /etc/udev/rules.d/49-teensy.rules:
@@ -63,21 +25,6 @@ sudo touch 49-teensy.rules
 sudo gedit 49-teensy.rules
 ```
 - Reboot your PC for the change to take effect
-
-### Test Teensy ROS Communication
-- Make sure the Teensy is still plugged in
-- View the USB ports with:
-```
-ls /dev/tty*
-```
-- The PORT is either /dev/ttyUSBX or /dev/ttyACMX (where X is a number)
-- Run ROS and echo the calibrated topic:
-```
-roscore
-rosrun roserial_arduino serial_node.py PORT
-rostopic hz /calibrated
-```
-- The topic should be published at 10Hz
 
 ### Install Baxter Simulator
 - Install package dependencies:
@@ -113,9 +60,21 @@ gedit robopuppet/launch/RoboPuppet.xml
 ### Test Simulator with Teensy
 - Make sure the Teensy is still plugged in
 - Open the MainProc project in Platformio and open platformio.ini
-- Uncomment the BAXTER_STUB_DEMO directive under build_flags
+- Set the following build flags (comment and uncomment as needed):
+```
+; Build Flags
+build_flags =
+	-D PLATFORM_ARDUINO		; Platform library flag
+	-D PLATFORM_TEENSY		; Platform library flag
+	-D PLATFORM_3V3			; Platform operating voltage
+	-D STUB_I2C				; Stubs I2C communication
+	;-D STUB_SERIAL			; Stubs ROS serial communication
+	-D BAXTER_STUB_DEMO		; Demonstration of Teensy control
+	-D LTIFILTER_MAX_A=10	; Max A coefficients for discrete filter
+	-D LTIFILTER_MAX_B=10	; Max B coefficients for discrete filter
+```
 - Build and upload the project to the Teensy
-- Run in terminal:
+- Run in terminal in Catkin directory:
 ```
 source devel/setup.bash
 cp src/baxter/baxter.sh .
