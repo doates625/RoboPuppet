@@ -10,12 +10,38 @@ import baxter_interface
 from baxter_interface import CHECK_VERSION
 from std_msgs.msg import Bool, Float32
 from math import pi
+from serial import Serial
+from serial_c import SerialC
+from slew_limiter import SlewLimiter
+from clamp_limiter import ClampLimiter
 
+"""
+Communication Constants
+"""
+SERIAL_PORT = '/dev/ttyACM0'
+SERIAL_BAUD = 115200
 UPDATE_RATE_HZ = 10.0
+BYTE_START = 0xAA
+BYTE_MODE_LIMP = 0x00
+BYTE_MODE_HOLD = 0x01
+BYTE_MODE_HAPTIC = 0x02
 
+"""
+Robot Constants
+"""
+NUM_JOINTS = 7
+NUM_GRIPS = 4
+JOINT_ANGLE_MINS = [-pi] * NUM_JOINTS
+JOINT_ANGLE_MAXS = [+pi] * NUM_JOINTS
+JOINT_RATE_MINS = [-pi] * NUM_JOINTS
+JOINT_RATE_MAXS = [+pi] * NUM_JOINTS
+
+"""
+Class Definition
+"""
 class RoboPuppet():
 
-	def __init__(self):
+	def __init__(self, port, baud):
 		"""
 		Initializes RoboPuppet Node
 		- Enables Baxter
@@ -36,140 +62,84 @@ class RoboPuppet():
 		# Gripper interfaces
 		self._grip_L = baxter_interface.Gripper('left', CHECK_VERSION)
 		self._grip_R = baxter_interface.Gripper('right', CHECK_VERSION)
-		self.set_grip_L('open')
-		self.set_grip_R('open')
+		self._grip_L.open()
+		self._grip_R.open()
 		
 		# Puppet state data
 		self._calibrated = False
 		self._angles_L = dict()
 		self._angles_R = dict()
-		for j in range(7):
+		self._slewers_L = []
+		self._slewers_R = []
+		self._clampers_L = []
+		self._clampers_R = []
+		for j in range(NUM_JOINTS):
 			self._angles_L[self._names_L[j]] = 0.0
 			self._angles_R[self._names_R[j]] = 0.0
+			self._slewers_L.append(SlewLimiter(
+				JOINT_RATE_MINS[j],
+				JOINT_RATE_MAXS[j],
+				UPDATE_RATE_HZ))
+			self._slewers_R.append(SlewLimiter(
+				JOINT_RATE_MINS[j],
+				JOINT_RATE_MAXS[j],
+				UPDATE_RATE_HZ))
+			self._clampers_L.append(ClampLimiter(
+				JOINT_ANGLE_MINS[j],
+				JOINT_ANGLE_MAXS[j]))
+			self._clampers_R.append(ClampLimiter(
+				JOINT_ANGLE_MINS[j],
+				JOINT_ANGLE_MAXS[j]))
+		self._grips_L = [0.0] * NUM_GRIPS
+		self._grips_R = [0.0] * NUM_GRIPS
+			
+		# Serial communication
+		self._serial = Serial(port=port, baudrate=baud, timeout=1.0)
+		self._serialc = SerialC(self._serial)
 		
-		# Puppet topic subscriptions
-		rospy.Subscriber('/puppet/calibrated', Bool, self._cb_calibrated)
-		rospy.Subscriber('/puppet/angles/L0', Float32, self._cb_angles, (self.set_joint_L, 0))
-		rospy.Subscriber('/puppet/angles/L1', Float32, self._cb_angles, (self.set_joint_L, 1))
-		rospy.Subscriber('/puppet/angles/L2', Float32, self._cb_angles, (self.set_joint_L, 2))
-		rospy.Subscriber('/puppet/angles/L3', Float32, self._cb_angles, (self.set_joint_L, 3))
-		rospy.Subscriber('/puppet/angles/L4', Float32, self._cb_angles, (self.set_joint_L, 4))
-		rospy.Subscriber('/puppet/angles/L5', Float32, self._cb_angles, (self.set_joint_L, 5))
-		rospy.Subscriber('/puppet/angles/L6', Float32, self._cb_angles, (self.set_joint_L, 6))
-		rospy.Subscriber('/puppet/angles/R0', Float32, self._cb_angles, (self.set_joint_R, 0))
-		rospy.Subscriber('/puppet/angles/R1', Float32, self._cb_angles, (self.set_joint_R, 1))
-		rospy.Subscriber('/puppet/angles/R2', Float32, self._cb_angles, (self.set_joint_R, 2))
-		rospy.Subscriber('/puppet/angles/R3', Float32, self._cb_angles, (self.set_joint_R, 3))
-		rospy.Subscriber('/puppet/angles/R4', Float32, self._cb_angles, (self.set_joint_R, 4))
-		rospy.Subscriber('/puppet/angles/R5', Float32, self._cb_angles, (self.set_joint_R, 5))
-		rospy.Subscriber('/puppet/angles/R6', Float32, self._cb_angles, (self.set_joint_R, 6))
-		rospy.Subscriber('/puppet/grippers/L0', Float32, self._cb_grippers, (self.set_grip_L, 0))
-		rospy.Subscriber('/puppet/grippers/L1', Float32, self._cb_grippers, (self.set_grip_L, 1))
-		rospy.Subscriber('/puppet/grippers/L2', Float32, self._cb_grippers, (self.set_grip_L, 2))
-		rospy.Subscriber('/puppet/grippers/L3', Float32, self._cb_grippers, (self.set_grip_L, 3))
-		rospy.Subscriber('/puppet/grippers/R0', Float32, self._cb_grippers, (self.set_grip_R, 0))
-		rospy.Subscriber('/puppet/grippers/R1', Float32, self._cb_grippers, (self.set_grip_R, 1))
-		rospy.Subscriber('/puppet/grippers/R2', Float32, self._cb_grippers, (self.set_grip_R, 2))
-		rospy.Subscriber('/puppet/grippers/R3', Float32, self._cb_grippers, (self.set_grip_R, 3))
 	
-	def update_arms(self):
+	def update(self):
 		"""
-		Sends most recent puppet arm angle commands to Baxter
+		Gets state data from RoboPuppet and sends commands to Baxter
 		"""
+		
+		# Send operating mode to RoboPuppet
+		self._serialc.write(BYTE_START, 'uint8')
+		self._serialc.write(BYTE_MODE_LIMP, 'uint8')
+		
+		# Get state data from RoboPuppet
+		self._calibrated = self._serialc.read('uint8') > 0
+		for j in range(NUM_JOINTS):
+			self._angles_L[self._names_L[j]] =\
+				self._clampers_L[j].update(
+					self._slewers_L[j].update(
+						self._serialc.read('float')))
+			self._angles_R[self._names_R[j]] =\
+				self._clampers_R[j].update(
+					self._slewers_R[j].update(
+						self._serialc.read('float')))
+		for g in range(NUM_GRIPS):
+			self._grips_L[g] = self._serialc.read('float')
+			self._grips_R[g] = self._serialc.read('float')
+		
+		# Send commands to baxter
 		self._arm_L.set_joint_positions(self._angles_L)
 		self._arm_R.set_joint_positions(self._angles_R)
-	
-	def get_joint_L(self, index):
-		"""
-		Reads left arm joint angle
-		:param index: Joint index [0-6]
-		:return: Joint angle [rad]
-		"""
-		return self._arm_L.joint_angle(self._names_L[index])
-		
-	def get_joint_R(self, index):
-		"""
-		Reads right arm joint angle
-		:param index: Joint index [0-6]
-		:return: Joint angle [rad]
-		"""
-		return self._arm_R.joint_angle(self._names_R[index])
-	
-	def set_joint_L(self, index, angle):
-		"""
-		Sets left arm joint angle
-		:param index: Joint index [0-6]
-		:param angle: Joint angle [rad]
-		"""
-		self._angles_L[self._names_L[index]] = angle
-		
-	def set_joint_R(self, index, angle):
-		"""
-		Sets right arm joint angle
-		:param index: Joint index [0-6]
-		:param angle: Joint angle [rad]
-		"""
-		self._angles_R[self._names_R[index]] = angle
-		
-	def set_grip_L(self, state):
-		"""
-		Sets left gripper state
-		:param state: 'open' or 'close'
-		"""
-		self._set_grip(self._grip_L, state)
-	
-	def set_grip_R(self, state):
-		"""
-		Sets left gripper state
-		:param state: 'open' or 'close'
-		"""
-		self._set_grip(self._grip_R, state)
-			
-	def _set_grip(self, grip, state):
-		"""
-		Sets gripper state
-		:param grip: Baxter gripper interface
-		:param state: 'open' or 'close'
-		"""
-		if state == 'open':
-			grip.open()
-		elif state == 'close':
-			grip.close()
-			
-	def _cb_calibrated(self, msg):
-		"""
-		Copies calibration status from RoboPuppet
-		:param msg: Calibration status [std_msgs.Bool]
-		"""
-		self._calibrated = msg.data
-	
-	def _cb_angles(self, msg, args):
-		"""
-		Copies joint angle from RoboPuppet
-		:param msg: Joint angle [std_msgs.Float32]
-		:param args: Arguments (setter function, index)
-		"""
-		setter = args[0]
-		index = args[1]
-		setter(index, msg.data)
-		
-	def _cb_grippers(self, msg, args):
-		"""
-		Commands gripper based on RoboPuppet gripper message
-		:param msg: Gripper channel state [std_msgs.Float32]
-		:param args: Arguments (setter function, index)
-		"""
-		setter = args[0]
-		index = args[1]
-		if index == 0:
-			if msg.data > 0.5:
-				setter('close')
-			else:
-				setter('open')
-	
+		if self._grips_L[0] > 0.5:
+			self._grip_L.close()
+		else:
+			self._grip_L.open()
+		if self._grips_R[0] > 0.5:
+			self._grip_R.close()
+		else:
+			self._grip_R.open()
+
+"""
+Main Function
+"""
 if __name__ == '__main__':
-	baxter = RoboPuppet()
+	baxter = RoboPuppet(SERIAL_PORT, SERIAL_BAUD)
 	rate = rospy.Rate(UPDATE_RATE_HZ)
 	while not rospy.is_shutdown():
-		baxter.update_arms()
+		baxter.update()
 		rate.sleep()

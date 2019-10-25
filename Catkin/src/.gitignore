@@ -6,3 +6,4 @@ baxter_simulator
 baxter_tools
 .rosinstall
 .rosinstall.bak
+*.pyc

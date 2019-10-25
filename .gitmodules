@@ -31,3 +31,6 @@
 [submodule "Catkin/src/rosserial"]
 	path = Catkin/src/rosserial
 	url = https://github.com/ros-drivers/rosserial.git
+[submodule "CppDeps/SerialC"]
+	path = CppDeps/SerialC
+	url = https://github.com/doates625/SerialC.git

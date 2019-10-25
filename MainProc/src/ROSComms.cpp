@@ -7,72 +7,27 @@
 #include <CoProcessor.h>
 #include <ArmL.h>
 #include <ArmR.h>
-#include <ros.h>
-#include <std_msgs/Bool.h>
-#include <std_msgs/Float32.h>
-#include <std_msgs/UInt8.h>
+#include <SerialC.h>
 
 /**
  * Private data and methods
  */
 namespace ROSComms
 {
-	// ROS Node Handle
-	ros::NodeHandle node_handle;
+	// Serial communication
+	SerialC serial(&Serial);
+	const uint32_t serial_baud = 115200;
+	const uint8_t byte_start = 0xAA;
+	const uint8_t byte_mode_limp = 0x00;
+	const uint8_t byte_mode_hold = 0x01;
+	const uint8_t byte_mode_haptic = 0x02;
 
-	// Calibration Publisher
-	std_msgs::Bool msg_calibrated;
-	ros::Publisher pub_calibrated("/puppet/calibrated", &msg_calibrated);
-
-	// Angles L Publishers
-	std_msgs::Float32 msg_angles_L[Robot::num_joints];
-	ros::Publisher pub_angles_L[Robot::num_joints] =
-	{
-		ros::Publisher("/puppet/angles/L0", &msg_angles_L[0]),
-		ros::Publisher("/puppet/angles/L1", &msg_angles_L[1]),
-		ros::Publisher("/puppet/angles/L2", &msg_angles_L[2]),
-		ros::Publisher("/puppet/angles/L3", &msg_angles_L[3]),
-		ros::Publisher("/puppet/angles/L4", &msg_angles_L[4]),
-		ros::Publisher("/puppet/angles/L5", &msg_angles_L[5]),
-		ros::Publisher("/puppet/angles/L6", &msg_angles_L[6]),
-	};
-
-	// Angles R Publishers
-	std_msgs::Float32 msg_angles_R[Robot::num_joints];
-	ros::Publisher pub_angles_R[Robot::num_joints] =
-	{
-		ros::Publisher("/puppet/angles/R0", &msg_angles_R[0]),
-		ros::Publisher("/puppet/angles/R1", &msg_angles_R[1]),
-		ros::Publisher("/puppet/angles/R2", &msg_angles_R[2]),
-		ros::Publisher("/puppet/angles/R3", &msg_angles_R[3]),
-		ros::Publisher("/puppet/angles/R4", &msg_angles_R[4]),
-		ros::Publisher("/puppet/angles/R5", &msg_angles_R[5]),
-		ros::Publisher("/puppet/angles/R6", &msg_angles_R[6]),
-	};
-
-	// Grippers L Publishers
-	std_msgs::Float32 msg_grippers_L[Robot::num_grips];
-	ros::Publisher pub_grippers_L[Robot::num_grips] =
-	{
-		ros::Publisher("/puppet/grippers/L0", &msg_grippers_L[0]),
-		ros::Publisher("/puppet/grippers/L1", &msg_grippers_L[1]),
-		ros::Publisher("/puppet/grippers/L2", &msg_grippers_L[2]),
-		ros::Publisher("/puppet/grippers/L3", &msg_grippers_L[3]),
-	};
-
-	// Grippers R Publishers
-	std_msgs::Float32 msg_grippers_R[Robot::num_grips];
-	ros::Publisher pub_grippers_R[Robot::num_grips] =
-	{
-		ros::Publisher("/puppet/grippers/R0", &msg_grippers_R[0]),
-		ros::Publisher("/puppet/grippers/R1", &msg_grippers_R[1]),
-		ros::Publisher("/puppet/grippers/R2", &msg_grippers_R[2]),
-		ros::Publisher("/puppet/grippers/R3", &msg_grippers_R[3]),
-	};
-
-	// Operation Mode Subscriber
-	void opmode_callback(const std_msgs::UInt8& msg);
-	ros::Subscriber<std_msgs::UInt8> sub_opmode("opmode", &opmode_callback);
+	// Copied state data
+	bool is_calibrated = false;
+	float angles_L[Robot::num_joints];
+	float angles_R[Robot::num_joints];
+	float grips_L[Robot::num_grips];
+	float grips_R[Robot::num_grips];
 
 #if defined(BAXTER_STUB_DEMO)
 	// Rep Test Parameters
@@ -94,24 +49,20 @@ void ROSComms::init()
 #if !defined(STUB_SERIAL)
 	if (!init_complete)
 	{
-		// Initialize ROS node
-		node_handle.initNode();
-		
-		// Initialize Publishers
-		node_handle.advertise(pub_calibrated);
+		// Initialize serial
+		Serial.begin(serial_baud);
+
+		// Reset state data
 		for (uint8_t j = 0; j < Robot::num_joints; j++)
 		{
-			node_handle.advertise(pub_angles_L[j]);
-			node_handle.advertise(pub_angles_R[j]);
+			angles_L[j] = 0.0f;
+			angles_R[j] = 0.0f;
 		}
 		for (uint8_t g = 0; g < Robot::num_grips; g++)
 		{
-			node_handle.advertise(pub_grippers_L[g]);
-			node_handle.advertise(pub_grippers_R[g]);
+			grips_L[g] = 0.0f;
+			grips_R[g] = 0.0f;
 		}
-
-		// Initialize Subscribers
-		node_handle.subscribe(sub_opmode);
 
 		// Set init flag
 		init_complete = true;
@@ -120,57 +71,81 @@ void ROSComms::init()
 }
 
 /**
- * @brief Processes incoming messages and sends state data to ROS.
+ * @brief Processes incoming messages and sends state data to ROS when prompted.
  */
 void ROSComms::update()
 {
 #if !defined(STUB_SERIAL)
 
-	// Publish calibration status
-	bool is_calibrated = CoProcessor::is_calibrated();
-	msg_calibrated.data = is_calibrated;
-	pub_calibrated.publish(&msg_calibrated);
-
-#if !defined(BAXTER_STUB_DEMO)
-
-	// Copy arm angle and gripper data with ISRs disabled
-	cli();
-	for (uint8_t j = 0; j < Robot::num_joints; j++)
+	// Check for start transmission message
+	if (!Serial.available() || serial.read_uint8() != byte_start)
 	{
-		msg_angles_L[j].data = ArmL::arm.get_angle(j);
-		msg_angles_R[j].data = ArmR::arm.get_angle(j);
+		return;
 	}
-	for (uint8_t g = 0; g < Robot::num_grips; g++)
+
+	// Get opmode and send to arms with ISRs disabed
+	while (!Serial.available());
+	uint8_t opmode = serial.read_uint8();
+	cli();
+	switch (opmode)
 	{
-		msg_grippers_L[g].data = ArmL::arm.get_gripper(g);
-		msg_grippers_R[g].data = ArmR::arm.get_gripper(g);
+		case byte_mode_limp:
+			ArmL::arm.set_mode(Arm::mode_limp);
+			ArmR::arm.set_mode(Arm::mode_limp);
+			break;
+		case byte_mode_hold:
+			ArmL::arm.set_mode(Arm::mode_hold);
+			ArmR::arm.set_mode(Arm::mode_hold);
+			break;
+		case byte_mode_haptic:
+			ArmL::arm.set_mode(Arm::mode_haptic);
+			ArmR::arm.set_mode(Arm::mode_haptic);
+			break;
 	}
 	sei();
 
+#if !defined(BAXTER_STUB_DEMO)
+
+	// Get state data from subsystems with ISRs disabled
+	cli();
+	is_calibrated = CoProcessor::is_calibrated();
+	for (uint8_t j = 0; j < Robot::num_joints; j++)
+	{
+		angles_L[j] = ArmL::arm.get_angle(j);
+		angles_R[j] = ArmR::arm.get_angle(j);
+	}
+	for (uint8_t g = 0; g < Robot::num_grips; g++)
+	{
+		grips_L[g] = ArmL::arm.get_gripper(g);
+		grips_R[g] = ArmR::arm.get_gripper(g);
+	}
+	sei();
+		
 #else
 
 	// Command baxter to do bicep curls
+	is_calibrated = true;
 	if (update_count % flip_count == 0)
 	{
 		if (curl_up)
 		{
 			// Curl up
-			msg_angles_L[3].data = 0.0f;
-			msg_angles_R[3].data = 0.0f;
-			msg_angles_L[5].data = -M_PI_2;
-			msg_angles_R[5].data = -M_PI_2;
-			msg_grippers_L[0].data = 1.0f;
-			msg_grippers_R[0].data = 1.0f;
+			angles_L[3] = 0.0f;
+			angles_R[3] = 0.0f;
+			angles_L[5] = -M_PI_2;
+			angles_R[5] = -M_PI_2;
+			grips_L[0] = 1.0f;
+			grips_R[0] = 1.0f;
 		}
 		else
 		{
 			// Curl down
-			msg_angles_L[3].data = +M_PI_2;
-			msg_angles_R[3].data = +M_PI_2;
-			msg_angles_L[5].data = 0.0f;
-			msg_angles_R[5].data = 0.0f;
-			msg_grippers_L[0].data = 0.0f;
-			msg_grippers_R[0].data = 0.0f;
+			angles_L[3] = +M_PI_2;
+			angles_R[3] = +M_PI_2;
+			angles_L[5] = 0.0f;
+			angles_R[5] = 0.0f;
+			grips_L[0] = 0.0f;
+			grips_R[0] = 0.0f;
 		}
 		curl_up = !curl_up;
 	}
@@ -178,34 +153,18 @@ void ROSComms::update()
 
 #endif
 
-	// Publish arm angles
+	// Send state data
+	serial.write_uint8(is_calibrated);
 	for (uint8_t j = 0; j < Robot::num_joints; j++)
 	{
-		pub_angles_L[j].publish(&msg_angles_L[j]);
-		pub_angles_R[j].publish(&msg_angles_R[j]);
+		serial.write_float(angles_L[j]);
+		serial.write_float(angles_R[j]);
 	}
-
-	// Publish gripper readings
 	for (uint8_t g = 0; g < Robot::num_grips; g++)
 	{
-		pub_grippers_L[g].publish(&msg_grippers_L[g]);
-		pub_grippers_R[g].publish(&msg_grippers_R[g]);
+		serial.write_float(grips_L[g]);
+		serial.write_float(grips_R[g]);
 	}
 
-	// Check subscriptions
-	node_handle.spinOnce();
-
 #endif
-}
-
-/**
- * @brief Sets opmode of ArmL and ArmR based on ROS message
- * 
- * For opmode enumeration, see Arm.h
- */
-void ROSComms::opmode_callback(const std_msgs::UInt8& msg)
-{
-	Arm::mode_t opmode = (Arm::mode_t)msg.data;
-	ArmL::arm.set_mode(opmode);
-	ArmR::arm.set_mode(opmode);
 }

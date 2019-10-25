@@ -63,5 +63,4 @@ void setup()
 void loop()
 {
 	ROSComms::update();
-	delay(Robot::t_ros_ms);
 }

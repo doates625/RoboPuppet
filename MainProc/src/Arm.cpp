@@ -95,7 +95,7 @@ void Arm::init()
 		}
 
 		// Set default mode to limp
-		arm_mode = mode_limp;
+		set_mode(mode_limp);
 		
 		// Set initialization flag
 		init_complete = true;
