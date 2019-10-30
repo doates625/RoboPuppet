@@ -1,6 +1,7 @@
 /**
  * @file main.cpp
  * @brief Control system for RoboPuppet main processor.
+ * @author Dan Oates (WPI Class of 2020)
  */
 #include <DebugLED.h>
 #include <I2CBus.h>
