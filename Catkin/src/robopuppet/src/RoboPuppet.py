@@ -8,7 +8,7 @@ ROS communication node between Baxter and RoboPuppet
 import rospy
 import baxter_interface
 from baxter_interface import CHECK_VERSION
-from std_msgs.msg import Bool, Float32
+from std_msgs.msg import Bool
 from math import pi
 from serial import Serial
 from serial_c import SerialC
@@ -67,6 +67,7 @@ class RoboPuppet():
 		
 		# Puppet state data
 		self._calibrated = False
+		self._cal_byte = 0x00
 		self._angles_L = dict()
 		self._angles_R = dict()
 		self._slewers_L = []
@@ -92,12 +93,21 @@ class RoboPuppet():
 				JOINT_ANGLE_MAXS[j]))
 		self._grips_L = [0.0] * NUM_GRIPS
 		self._grips_R = [0.0] * NUM_GRIPS
+		
+		# Calibration publishers
+		self._pub_cal_L0 = rospy.Publisher('/puppet/calibration/L0', Bool, queue_size=1)
+		self._pub_cal_L2 = rospy.Publisher('/puppet/calibration/L2', Bool, queue_size=1)
+		self._pub_cal_L4 = rospy.Publisher('/puppet/calibration/L4', Bool, queue_size=1)
+		self._pub_cal_L6 = rospy.Publisher('/puppet/calibration/L6', Bool, queue_size=1)
+		self._pub_cal_R0 = rospy.Publisher('/puppet/calibration/R0', Bool, queue_size=1)
+		self._pub_cal_R2 = rospy.Publisher('/puppet/calibration/R2', Bool, queue_size=1)
+		self._pub_cal_R4 = rospy.Publisher('/puppet/calibration/R4', Bool, queue_size=1)
+		self._pub_cal_R6 = rospy.Publisher('/puppet/calibration/R6', Bool, queue_size=1)
 			
 		# Serial communication
 		self._serial = Serial(port=port, baudrate=baud, timeout=1.0)
 		self._serialc = SerialC(self._serial)
 		
-	
 	def update(self):
 		"""
 		Gets state data from RoboPuppet and sends commands to Baxter
@@ -107,8 +117,9 @@ class RoboPuppet():
 		self._serialc.write(BYTE_START, 'uint8')
 		self._serialc.write(BYTE_MODE_LIMP, 'uint8')
 		
-		# Get state data from RoboPuppet
-		self._calibrated = self._serialc.read('uint8') > 0
+		# Get state data from RP
+		self._cal_byte = self._serialc.read('uint8')
+		self._calibrated = (self._cal_byte == 0xFF)
 		for j in range(NUM_JOINTS):
 			self._angles_L[self._names_L[j]] =\
 				self._clampers_L[j].update(
@@ -123,16 +134,27 @@ class RoboPuppet():
 			self._grips_R[g] = self._serialc.read('float')
 		
 		# Send commands to baxter
-		self._arm_L.set_joint_positions(self._angles_L)
-		self._arm_R.set_joint_positions(self._angles_R)
-		if self._grips_L[0] > 0.5:
-			self._grip_L.close()
-		else:
-			self._grip_L.open()
-		if self._grips_R[0] > 0.5:
-			self._grip_R.close()
-		else:
-			self._grip_R.open()
+		if self._calibrated:
+			self._arm_L.set_joint_positions(self._angles_L)
+			self._arm_R.set_joint_positions(self._angles_R)
+			if self._grips_L[0] > 0.5:
+				self._grip_L.close()
+			else:
+				self._grip_L.open()
+			if self._grips_R[0] > 0.5:
+				self._grip_R.close()
+			else:
+				self._grip_R.open()
+		
+		# Publish joint state topics
+		self._pub_cal_L0.publish(Bool((self._cal_byte >> 0) & 0x01))
+		self._pub_cal_L2.publish(Bool((self._cal_byte >> 1) & 0x01))
+		self._pub_cal_L4.publish(Bool((self._cal_byte >> 2) & 0x01))
+		self._pub_cal_L6.publish(Bool((self._cal_byte >> 3) & 0x01))
+		self._pub_cal_R0.publish(Bool((self._cal_byte >> 4) & 0x01))
+		self._pub_cal_R2.publish(Bool((self._cal_byte >> 5) & 0x01))
+		self._pub_cal_R4.publish(Bool((self._cal_byte >> 6) & 0x01))
+		self._pub_cal_R6.publish(Bool((self._cal_byte >> 7) & 0x01))
 
 """
 Main Function
