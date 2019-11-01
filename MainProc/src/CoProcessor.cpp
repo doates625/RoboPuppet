@@ -30,6 +30,7 @@ namespace CoProcessor
 	// Initialization flags
 	bool init_complete = false;
 	bool calibrated = false;
+	uint8_t cal_byte = 0x00;
 }
 
 /**
@@ -57,22 +58,31 @@ bool CoProcessor::is_calibrated()
 #if !defined(STUB_I2C)
 	if (!calibrated)
 	{
-		// Read calibration registers
-		calibrated = true;
-		uint8_t cal_statuses = i2c_device.read_uint8(reg_cal_status);
-		if (!(cal_statuses & reg_cal_j0L)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j2L)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j4L)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j6L)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j0R)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j2R)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j4R)) calibrated = false;
-		if (!(cal_statuses & reg_cal_j6R)) calibrated = false;
+		cal_byte = i2c_device.read_uint8(reg_cal_status);
+		calibrated = (cal_byte == 0xFF);
 	}
 	return calibrated;
 #else
 	return true;
 #endif
+}
+
+/**
+ * @brief Returns calibration status byte from Co-processor
+ * 
+ * Bitmask (1 = calibrated, 0 = not):
+ * - Bit 0 = Joint L0 status
+ * - Bit 1 = Joint L2 status
+ * - Bit 2 = Joint L4 status
+ * - Bit 3 = Joint L6 status
+ * - Bit 4 = Joint R0 status
+ * - Bit 5 = Joint R2 status
+ * - Bit 6 = Joint R4 status
+ * - Bit 7 = Joint R8 status
+ */
+uint8_t CoProcessor::get_cal_byte()
+{
+	return cal_byte;
 }
 
 /**

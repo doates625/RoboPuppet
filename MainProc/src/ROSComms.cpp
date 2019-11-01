@@ -23,7 +23,7 @@ namespace ROSComms
 	const uint8_t byte_mode_haptic = 0x02;
 
 	// Copied state data
-	bool is_calibrated = false;
+	uint8_t cal_byte = 0x00;
 	float angles_L[Robot::num_joints];
 	float angles_R[Robot::num_joints];
 	float grips_L[Robot::num_grips];
@@ -108,7 +108,7 @@ void ROSComms::update()
 
 	// Get state data from subsystems with ISRs disabled
 	cli();
-	is_calibrated = CoProcessor::is_calibrated();
+	cal_byte = CoProcessor::get_cal_byte();
 	for (uint8_t j = 0; j < Robot::num_joints; j++)
 	{
 		angles_L[j] = ArmL::arm.get_angle(j);
@@ -154,7 +154,7 @@ void ROSComms::update()
 #endif
 
 	// Send state data
-	serial.write_uint8(is_calibrated);
+	serial.write_uint8(cal_byte);
 	for (uint8_t j = 0; j < Robot::num_joints; j++)
 	{
 		serial.write_float(angles_L[j]);

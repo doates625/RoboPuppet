@@ -9,6 +9,7 @@ namespace CoProcessor
 {
 	void init();
 	bool is_calibrated();
+	uint8_t get_cal_byte();
 	void update();
 	float get_angle(Robot::arm_t arm, uint8_t joint);
 }
