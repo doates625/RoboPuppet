@@ -19,7 +19,9 @@ Encoder::Encoder(uint8_t pinA, uint8_t pinB, uint8_t pinX) {
 }
 
 int16_t Encoder::getPos(){
+	cli();
   return pos;
+	sei();
 }
 
 void Encoder::changeA() {
@@ -62,13 +64,16 @@ void Encoder::changeB() {
 
 void Encoder::changeX() {
   if(!calibrated) {
+	  Serial.println("WAPPO");
     calibrated = true;
     pos = 0;
   }
 }
 
 bool Encoder::isCalibrated() {
+	cli();
   return calibrated;
+	sei();
 }
 
 /* Quadrature Encoder Waveforms

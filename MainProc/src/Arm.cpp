@@ -112,7 +112,7 @@ void Arm::update()
 	joint_angles[2] = CoProcessor::get_angle(arm, 2);
 	joint_angles[4] = CoProcessor::get_angle(arm, 4);
 	joint_angles[6] = CoProcessor::get_angle(arm, 6);
-#if !defined(STUB_I2C)
+#if !defined(STUB_ENCODERS)
 	joint_angles[1] = i2c_encs[0].get_angle();
 	joint_angles[3] = i2c_encs[1].get_angle();
 	joint_angles[5] = i2c_encs[2].get_angle();

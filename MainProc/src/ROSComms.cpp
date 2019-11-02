@@ -29,14 +29,6 @@ namespace ROSComms
 	float grips_L[Robot::num_grips];
 	float grips_R[Robot::num_grips];
 
-#if defined(BAXTER_STUB_DEMO)
-	// Rep Test Parameters
-	const float rep_time = 6.0f;
-	const uint32_t flip_count = (rep_time / 2.0f) / Robot::t_ros_s;
-	uint32_t update_count = 0;
-	bool curl_up = true;
-#endif
-
 	// Initialization flag
 	bool init_complete = false;
 }
@@ -46,7 +38,7 @@ namespace ROSComms
  */
 void ROSComms::init()
 {
-#if !defined(STUB_SERIAL)
+#if !defined(STUB_ROSCOMMS)
 	if (!init_complete)
 	{
 		// Initialize serial
@@ -75,7 +67,7 @@ void ROSComms::init()
  */
 void ROSComms::update()
 {
-#if !defined(STUB_SERIAL)
+#if !defined(STUB_ROSCOMMS)
 
 	// Check for start transmission message
 	if (!Serial.available() || serial.read_uint8() != byte_start)
@@ -104,8 +96,6 @@ void ROSComms::update()
 	}
 	sei();
 
-#if !defined(BAXTER_STUB_DEMO)
-
 	// Get state data from subsystems with ISRs disabled
 	cli();
 	cal_byte = CoProcessor::get_cal_byte();
@@ -120,38 +110,6 @@ void ROSComms::update()
 		grips_R[g] = ArmR::arm.get_gripper(g);
 	}
 	sei();
-		
-#else
-
-	// Command baxter to do bicep curls
-	is_calibrated = true;
-	if (update_count % flip_count == 0)
-	{
-		if (curl_up)
-		{
-			// Curl up
-			angles_L[3] = 0.0f;
-			angles_R[3] = 0.0f;
-			angles_L[5] = -M_PI_2;
-			angles_R[5] = -M_PI_2;
-			grips_L[0] = 1.0f;
-			grips_R[0] = 1.0f;
-		}
-		else
-		{
-			// Curl down
-			angles_L[3] = +M_PI_2;
-			angles_R[3] = +M_PI_2;
-			angles_L[5] = 0.0f;
-			angles_R[5] = 0.0f;
-			grips_L[0] = 0.0f;
-			grips_R[0] = 0.0f;
-		}
-		curl_up = !curl_up;
-	}
-	update_count++;
-
-#endif
 
 	// Send state data
 	serial.write_uint8(cal_byte);

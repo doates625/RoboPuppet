@@ -3,7 +3,6 @@
  * @brief Control system for RoboPuppet main processor.
  * @author Dan Oates (WPI Class of 2020)
  */
-#include <DebugLED.h>
 #include <I2CBus.h>
 #include <CoProcessor.h>
 #include <ADCMux.h>
@@ -42,17 +41,11 @@ void ctrl_loop()
 void setup()
 {
 	// Subsystem Initializations
-	DebugLED::init();
 	I2CBus::init();
 	CoProcessor::init();
 	ArmL::arm.init();
 	ArmR::arm.init();
 	ROSComms::init();
-
-	// Wait for co-processor calibration
-	led = 1;
-	while (!CoProcessor::is_calibrated());
-	led = 0;
 
 	// Initialize timer interrupts
 	ctrl_timer.begin(ctrl_loop, Robot::t_ctrl_us);
@@ -64,4 +57,29 @@ void setup()
 void loop()
 {
 	ROSComms::update();
+#if defined(SERIAL_DEBUG)
+
+	// Indicate debug start
+	led = 1;
+	Serial.println("START DEBUG");
+
+	// Print Arm L angles
+	Serial.println("Arm L Angles [rad]:");
+	for (uint8_t i = 0; i < Robot::num_joints; i++)
+	{
+		Serial.println(String(i) + ": " + String(ArmL::arm.get_angle(i), 2));
+	}
+
+	// Print Arm R angles
+	Serial.println("Arm R Angles [rad]:");
+	for (uint8_t i = 0; i < Robot::num_joints; i++)
+	{
+		Serial.println(String(i) + ": " + String(ArmR::arm.get_angle(i), 2));
+	}
+
+	// Indicate debug end
+	Serial.println("END DEBUG");
+	led = 0;
+	delay(1000);
+#endif
 }

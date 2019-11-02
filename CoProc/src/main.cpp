@@ -20,6 +20,7 @@ using namespace CoProcI2C;
 // I2C Pins
 const uint8_t pin_i2c_sda = 18;		// Serial data pin
 const uint8_t pin_i2c_scl = 19;		// Serial clock pin
+const uint8_t pin_debug_led = 13;	// Debug LED pin
 const uint8_t pin_debug_rec = 31;	// Debug receive pin
 const uint8_t pin_debug_req = 32;	// Debug request pin
 
@@ -92,7 +93,25 @@ void ISR_enc_j6R_X() { enc_j6R.changeX(); }
 /**
  * Global Variables
  */
+const uint32_t serial_baud = 115200;
 uint8_t reg_requested[1] = { 0x00 };
+
+/**
+ * @brief Compiles calibration status byte
+ */
+uint8_t make_cal_byte()
+{
+	uint8_t cal_byte = 0x00;
+	cal_byte |= ((enc_j0L.isCalibrated() ? 1 : 0) << 0);
+	cal_byte |= ((enc_j2L.isCalibrated() ? 1 : 0) << 1);
+	cal_byte |= ((enc_j4L.isCalibrated() ? 1 : 0) << 2);
+	cal_byte |= ((enc_j6L.isCalibrated() ? 1 : 0) << 3);
+	cal_byte |= ((enc_j0R.isCalibrated() ? 1 : 0) << 4);
+	cal_byte |= ((enc_j2R.isCalibrated() ? 1 : 0) << 5);
+	cal_byte |= ((enc_j4R.isCalibrated() ? 1 : 0) << 6);
+	cal_byte |= ((enc_j6R.isCalibrated() ? 1 : 0) << 7);
+	return cal_byte;
+}
 
 /**
  * @brief I2C data write callback
@@ -109,12 +128,6 @@ void I2C_REG_SET(size_t num_bytes)
 
 	// Read requested register
 	Wire.read(reg_requested, num_bytes);
-
-	// Serial debug
-	#if defined(SERIAL_DEBUG)
-		Serial.print("Register requested: ");
-		Serial.println((char)reg_requested[0], HEX);
-	#endif
 
 	// I2C LED debug
 	#if defined(I2C_LED_DEBUG)
@@ -152,20 +165,7 @@ void I2C_SEND()
 			case reg_j4R_lsb: Wire.write((uint8_t)(enc_j4R.getPos() >> 0)); break;
 			case reg_j6R_msb: Wire.write((uint8_t)(enc_j6R.getPos() >> 8)); break;
 			case reg_j6R_lsb: Wire.write((uint8_t)(enc_j6R.getPos() >> 0)); break;
-			case reg_cal_status:
-			{
-				uint8_t cal_state = 0x00;
-				cal_state |= (enc_j0L.isCalibrated() << 0);
-				cal_state |= (enc_j2L.isCalibrated() << 1);
-				cal_state |= (enc_j4L.isCalibrated() << 2);
-				cal_state |= (enc_j6L.isCalibrated() << 3);
-				cal_state |= (enc_j0R.isCalibrated() << 4);
-				cal_state |= (enc_j2R.isCalibrated() << 5);
-				cal_state |= (enc_j4R.isCalibrated() << 6);
-				cal_state |= (enc_j6R.isCalibrated() << 7);
-				Wire.write(cal_state);
-				break;
-			}
+			case reg_cal_status: Wire.write(make_cal_byte()); break;
 			default: Wire.write(reg_invalid); break;
 		}
 	#else
@@ -208,9 +208,7 @@ void setup()
 {
 	// Serial debug
 	#if defined(SERIAL_DEBUG)
-		Serial.begin(115200);
-		Serial.println("Send any byte to begin.");
-		while (!Serial.available());
+		Serial.begin(serial_baud);
 		Serial.println("Starting Setup.");
 	#endif
 	
@@ -221,6 +219,10 @@ void setup()
 		digitalWrite(pin_debug_rec, LOW);
 		digitalWrite(pin_debug_req, LOW);
 	#endif
+
+	// LED debug
+	pinMode(pin_debug_led, OUTPUT);
+	digitalWrite(pin_debug_led, HIGH);
 
 	// Attach encoder ISRs
 	attachInterrupt(digitalPinToInterrupt(pin_enc_j0L_A), ISR_enc_j0L_A, CHANGE);
@@ -248,6 +250,7 @@ void setup()
 	attachInterrupt(digitalPinToInterrupt(pin_enc_j6R_B), ISR_enc_j6R_B, CHANGE);
 	attachInterrupt(digitalPinToInterrupt(pin_enc_j6R_X), ISR_enc_j6R_X, CHANGE);
 
+
 	// Initialize I2C slave
 	Wire.begin(I2C_SLAVE, i2c_addr, I2C_PINS_18_19, I2C_PULLUP_EXT, 400000);
 	Wire.onReceive(I2C_REG_SET);	// Receive callback
@@ -257,15 +260,38 @@ void setup()
 	#if defined(SERIAL_DEBUG)
 		Serial.println("Finished Setup.");
 	#endif
+
+	// End setup
+	digitalWrite(pin_debug_led, LOW);
 }
 
 /**
  * @brief Arduino loop function
  * 
- * This function must be defined but does nothing. All processing is handled in
- * encoder ISRs and I2C callbacks.
+ * This function must be defined but does nothing unless SERIAL_DEBUG is
+ * enabled. All processing is handled in encoder ISRs and I2C callbacks.
+ * 
+ * WARNING: Do NOT remove the delay(...) call. The Teensy 4.0 I2C master gets
+ * hung up during transmissions unless delay(>=1) is called in loop() and I have
+ * absolutely no idea why.
  */
 void loop()
 {
-	return;
+#if defined(SERIAL_DEBUG)
+	digitalWrite(pin_debug_led, HIGH);
+	Serial.println("Joint Angles [rad]:");
+	Serial.println("L0: " + String(enc_j0L.getPos()));
+	Serial.println("L2: " + String(enc_j2L.getPos()));
+	Serial.println("L4: " + String(enc_j4L.getPos()));
+	Serial.println("L6: " + String(enc_j6L.getPos()));
+	Serial.println("R0: " + String(enc_j0R.getPos()));
+	Serial.println("R2: " + String(enc_j2R.getPos()));
+	Serial.println("R4: " + String(enc_j4R.getPos()));
+	Serial.println("R6: " + String(enc_j6R.getPos()));
+	Serial.println("Calibration Byte:");
+	Serial.println(make_cal_byte(), BIN);
+	Serial.println();
+	digitalWrite(pin_debug_led, LOW);
+#endif
+	delay(1000);
 }

@@ -19,18 +19,21 @@ namespace CoProcessor
 	I2CDevice i2c_device;				// I2C device interface
 
 	// Encoder Angle Conversion
-	const uint8_t encoder_bits = 11;
+	const uint8_t encoder_bits = 13;
 	const float rad_per_bit = 2.0f * M_PI / pow(2.0f, encoder_bits);
 	
 	// State Data
 	const uint8_t encs_per_arm = 4;	// Encoders per arm
 	float anglesL[encs_per_arm];	// Arm L joint angles {0, 2, 4, 6} [rad]
 	float anglesR[encs_per_arm];	// Arm R joint angles {0, 2, 4, 6} [rad]
+	bool calibrated = false;		// True if all 8 encoders are calibrated
+	uint8_t cal_byte = 0x00;		// Encoder calibration of each encoder
 
-	// Initialization flags
+	// Initialization flag
 	bool init_complete = false;
-	bool calibrated = false;
-	uint8_t cal_byte = 0x00;
+	
+	// Priavte method
+	float read_angle(uint8_t reg_msb, uint8_t reg_lsb);
 }
 
 /**
@@ -40,8 +43,18 @@ void CoProcessor::init()
 {
 	if (!init_complete)
 	{
+		// Initialize I2C
 		I2CBus::init();
 		i2c_device = I2CDevice(I2CBus::get_wire(), i2c_addr, endian);
+
+		// Zero arm angle readings
+		for (uint8_t i = 0; i < encs_per_arm; i++)
+		{
+			anglesL[i] = 0.0f;
+			anglesR[i] = 0.0f;
+		}
+
+		// Set init flag
 		init_complete = true;
 	}
 }
@@ -55,12 +68,7 @@ void CoProcessor::init()
  */
 bool CoProcessor::is_calibrated()
 {
-#if !defined(STUB_I2C)
-	if (!calibrated)
-	{
-		cal_byte = i2c_device.read_uint8(reg_cal_status);
-		calibrated = (cal_byte == 0xFF);
-	}
+#if !defined(STUB_COPROCESSOR)
 	return calibrated;
 #else
 	return true;
@@ -90,18 +98,23 @@ uint8_t CoProcessor::get_cal_byte()
  */
 void CoProcessor::update()
 {
-#if !defined(STUB_I2C)
-	i2c_device.read_sequence(reg_j0L_msb, 16);
-	for (uint8_t i = 0; i < encs_per_arm; i++)
+#if !defined(STUB_STUB_COPROCESSOR)
+	if (!calibrated)
 	{
-		float angle_unwrapped = rad_per_bit * i2c_device.read_int16();
-		anglesL[i] = CppUtil::wrap(angle_unwrapped, -M_PI, +M_PI);
+		cal_byte = i2c_device.read_uint8(reg_cal_status);
+		calibrated = (cal_byte == 0xFF);
 	}
-	for (uint8_t i = 0; i < encs_per_arm; i++)
-	{
-		float angle_unwrapped = rad_per_bit * i2c_device.read_int16();
-		anglesR[i] = CppUtil::wrap(angle_unwrapped, -M_PI, +M_PI);
-	}
+	anglesL[0] = read_angle(reg_j0L_msb, reg_j0L_lsb);
+	anglesL[1] = read_angle(reg_j2L_msb, reg_j2L_lsb);
+	anglesL[2] = read_angle(reg_j4L_msb, reg_j4L_lsb);
+	anglesL[3] = read_angle(reg_j6L_msb, reg_j6L_lsb);
+	anglesR[0] = read_angle(reg_j0R_msb, reg_j0R_lsb);
+	anglesR[1] = read_angle(reg_j2R_msb, reg_j2R_lsb);
+	anglesR[2] = read_angle(reg_j4R_msb, reg_j4R_lsb);
+	anglesR[3] = read_angle(reg_j6R_msb, reg_j6R_lsb);
+#else
+	cal_byte = 0xFF;
+	calibrated = true;
 #endif
 }
 
@@ -119,4 +132,19 @@ float CoProcessor::get_angle(Robot::arm_t arm, uint8_t joint)
 		case Robot::arm_R: return anglesR[index];
 	}
 	return 0.0f;
+}
+
+/**
+ * @brief Reads encoder angle registers
+ * @param reg_msb Address of MSB register
+ * @param reg_lsb Address of LSB register
+ * @return Encoder angle wrapped to [-pi,+pi] [rad]
+ */
+float CoProcessor::read_angle(uint8_t reg_msb, uint8_t reg_lsb)
+{
+	union16_t union16;
+	union16.bytes[1] = i2c_device.read_uint8(reg_msb);
+	union16.bytes[0] = i2c_device.read_uint8(reg_lsb);
+	float angle = rad_per_bit * union16.int16s[0];
+	return CppUtil::wrap(angle, -M_PI, +M_PI);
 }

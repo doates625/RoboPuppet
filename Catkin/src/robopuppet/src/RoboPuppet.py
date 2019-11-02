@@ -132,8 +132,13 @@ class RoboPuppet():
 		for g in range(NUM_GRIPS):
 			self._grips_L[g] = self._serialc.read('float')
 			self._grips_R[g] = self._serialc.read('float')
+			
+		# Log state data
+		rospy.loginfo('Cal Byte: ' + str(self._cal_byte))
+		rospy.loginfo('Joint L0: ' + str(self._angles_L[self._names_L[0]]))
 		
 		# Send commands to baxter
+		self._calibrated = True	# TEMPORARY DEBUG
 		if self._calibrated:
 			self._arm_L.set_joint_positions(self._angles_L)
 			self._arm_R.set_joint_positions(self._angles_R)
