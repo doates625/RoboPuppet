@@ -77,7 +77,6 @@ build_flags =
 - Run in terminal in Catkin directory:
 ```
 source devel/setup.bash
-cp src/baxter/baxter.sh .
 ./src/baxter/baxter.sh sim
 roslaunch robopuppet RoboPuppet.xml
 ```
