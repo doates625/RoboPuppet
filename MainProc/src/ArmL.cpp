@@ -16,9 +16,9 @@ namespace ArmL
 	// I2C Encoder Settings
 	uint8_t enc_addrs[Arm::num_i2c_encs] =	// TODO confirm with Mike
 	{
-		0x48,	// Joint 1
-		0x55,	// Joint 3
-		0x55,	// Joint 5
+		0x00,	// Joint 1
+		0x00,	// Joint 3
+		0x48,	// Joint 5
 	};
 	float enc_homes[Arm::num_i2c_encs] =	// TODO calibrate
 	{

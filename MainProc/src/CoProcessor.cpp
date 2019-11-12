@@ -98,7 +98,7 @@ uint8_t CoProcessor::get_cal_byte()
  */
 void CoProcessor::update()
 {
-#if !defined(STUB_STUB_COPROCESSOR)
+#if !defined(STUB_COPROCESSOR)
 	if (!calibrated)
 	{
 		cal_byte = i2c_device.read_uint8(reg_cal_status);

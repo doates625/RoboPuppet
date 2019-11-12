@@ -9,7 +9,7 @@
 namespace I2CBus
 {
 	TwoWire* const wire = &Wire;		// Wire interface
-	const uint32_t clock_rate = 400000;	// I2C clock rate
+	const uint32_t clock_rate = 100000;	// I2C clock rate
 	const uint8_t pin_scl = 19;			// SCL pin
 	const uint8_t pin_sda = 18;			// SDA pin
 	bool init_complete = false;			// Init flag
