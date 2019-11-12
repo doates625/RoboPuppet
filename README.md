@@ -51,13 +51,9 @@ gedit baxter/baxter.sh
 ```
 - Change 'your_ip' on line 26 to "127.0.0.1"
 - Change 'ros_version' on line 30 to "kinetic"
-- Open RoboPuppet launch file:
-```
-gedit robopuppet/launch/RoboPuppet.xml
-```
-- Change value="..." on line 13 to PORT
 
 ### Test Simulator with Teensy
+- Install Visual Studio Code and the PlatformIO extension
 - Make sure the Teensy is still plugged in
 - Open the MainProc project in Platformio and open platformio.ini
 - Set the following build flags (comment and uncomment as needed):
@@ -67,11 +63,12 @@ build_flags =
 	-D PLATFORM_ARDUINO		; Platform library flag
 	-D PLATFORM_TEENSY		; Platform library flag
 	-D PLATFORM_3V3			; Platform operating voltage
-	-D STUB_I2C				; Stubs I2C communication
-	;-D STUB_SERIAL			; Stubs ROS serial communication
-	-D BAXTER_STUB_DEMO		; Demonstration of Teensy control
-	-D LTIFILTER_MAX_A=10	; Max A coefficients for discrete filter
-	-D LTIFILTER_MAX_B=10	; Max B coefficients for discrete filter
+	;	-D SERIAL_DEBUG			; Serial debug printing in loop
+	;	-D STUB_ENCODERS		; Stubs I2C encoder communication
+	;	-D STUB_COPROCESSOR		; Stubs co-processor I2C communication
+	;	-D STUB_ROSCOMMS		; Stubs ROS serial comunication
+	-D LTIFILTER_MAX_A=10	; Max A coefficients for LTI filters
+	-D LTIFILTER_MAX_B=10	; Max B coefficients for LTI filters
 ```
 - Build and upload the project to the Teensy
 - Run in terminal in Catkin directory:
@@ -82,7 +79,7 @@ roslaunch robopuppet RoboPuppet.xml
 ```
 - Verify Baxter is running:
 ```
-rostopic echo /robot/state
+rostopic hz /robot/state
 ```
 - The state topic should be publishing at 100Hz
-- If everything was done correctly, Baxter should be periodically raising and lowering its arms every few seconds
+- Move the RoboPuppet arms and verify that simulated Baxter follows
