@@ -37,10 +37,18 @@ public:
 	// Init and run routines
 	void init();
 	void update();
+	
+	// Commands
+	void set_enabled(bool enabled);
 	void set_mode(mode_t arm_mode);
+	void zero_joint(uint8_t joint);
+	void set_pid_gains(uint8_t joint, float kp, float ki, float kd);
+	void set_pid_limits(uint8_t joint, float v_min, float v_max);
 
 	// Accessors
+	bool get_enabled();
 	mode_t get_mode();
+	bool get_cal(uint8_t joint);
 	float get_angle(uint8_t joint);
 	float get_velocity(uint8_t joint);
 	float get_current(uint8_t joint);
@@ -54,7 +62,9 @@ private:
 	uint8_t* servo_pins;
 
 	// State Data
+	bool enabled;
 	mode_t arm_mode;
+	float joint_cals[Robot::num_joints];
 	float joint_setpoints[Robot::num_joints];
 	float joint_angles[Robot::num_joints];
 	float joint_velocities[Robot::num_joints];

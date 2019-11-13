@@ -51,12 +51,16 @@ namespace ADCMux
 	const float amps_offset = -amps_max;
 
 	// Multiplexer Objects
-	DigitalOut select_outs[num_select_pins] = 
+	DigitalOut select_0(pins_mux_select[0]);
+	DigitalOut select_1(pins_mux_select[1]);
+	DigitalOut select_2(pins_mux_select[2]);
+	DigitalOut select_3(pins_mux_select[3]);
+	DigitalOut* select_outs[num_select_pins] = 
 	{
-		DigitalOut(pins_mux_select[0]),
-		DigitalOut(pins_mux_select[1]),
-		DigitalOut(pins_mux_select[2]),
-		DigitalOut(pins_mux_select[3]),
+		&select_0,
+		&select_1,
+		&select_2,
+		&select_3,
 	};
 	Mux<AnalogIn> mux_L(pin_L, num_select_pins, select_outs);
 	Mux<AnalogIn> mux_R(pin_R, num_select_pins, select_outs);

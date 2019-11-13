@@ -34,3 +34,12 @@
 [submodule "CoProc/lib/i2c_t3"]
 	path = CoProc/lib/i2c_t3
 	url = https://github.com/nox771/i2c_t3.git
+[submodule "CppDeps/SerialServer"]
+	path = CppDeps/SerialServer
+	url = https://github.com/doates625/SerialServer.git
+[submodule "CppDeps/Struct"]
+	path = CppDeps/Struct
+	url = https://github.com/doates625/Struct.git
+[submodule "CppDeps/Timer"]
+	path = CppDeps/Timer
+	url = https://github.com/doates625/Timer.git

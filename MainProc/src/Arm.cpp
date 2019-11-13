@@ -89,12 +89,22 @@ void Arm::init()
 		CoProcessor::init();
 
 		// Initialize servos
-		for (uint8_t i = 0; i < Robot::num_joints; i++)
+		for (uint8_t j = 0; j < Robot::num_joints; j++)
 		{
-			servos[i].attach(servo_pins[i]);
+			servos[j].attach(servo_pins[j]);
 		}
 
-		// Set default mode to limp
+		// Initialize calibration
+		joint_cals[0] = false;	// Quad encoder
+		joint_cals[1] = true;	// Hall encoder
+		joint_cals[2] = false;	// Quad encoder
+		joint_cals[3] = true;	// Hall encoder
+		joint_cals[4] = false;	// Quad encoder
+		joint_cals[5] = true;	// Hall encoder
+		joint_cals[0] = false;	// Quad encoder
+
+		// Set default mode to enabled and limp
+		set_enabled(true);
 		set_mode(mode_limp);
 		
 		// Set initialization flag
@@ -107,6 +117,18 @@ void Arm::init()
  */
 void Arm::update()
 {
+	// Do nothing if disabled
+	if (!enabled)
+	{
+		return;
+	}
+
+	// Get joint calibration statuses
+	joint_cals[0] = CoProcessor::get_cal(arm, 0);
+	joint_cals[2] = CoProcessor::get_cal(arm, 2);
+	joint_cals[4] = CoProcessor::get_cal(arm, 4);
+	joint_cals[6] = CoProcessor::get_cal(arm, 6);
+
 	// Read joint angles
 	joint_angles[0] = CoProcessor::get_angle(arm, 0);
 	joint_angles[2] = CoProcessor::get_angle(arm, 2);
@@ -164,6 +186,19 @@ void Arm::update()
 }
 
 /**
+ * @brief Enables or disables arm
+ * @param enabled True to enable, false to disable
+ * 
+ * When disabled, the arm is set to limp mode update() method is nullified.
+ * Arm angles and control signals are not updated until enabled again.
+ */
+void Arm::set_enabled(bool enabled)
+{
+	this->enabled = enabled;
+	set_mode(mode_limp);
+}
+
+/**
  * @brief Sets current arm mode.
  * @param mode Arm mode {mode_limp, mode_hold, mode_haptic}
  */
@@ -203,11 +238,69 @@ void Arm::set_mode(mode_t arm_mode)
 }
 
 /**
+ * @brief Zeros joint angle
+ * @param joint Joint index [0...6]
+ */
+void Arm::zero_joint(uint8_t joint)
+{
+	switch (joint)
+	{
+		case 0: CoProcessor::zero_joint(arm, joint); break;
+		case 1: i2c_encs[0].set_home(); break;
+		case 2: CoProcessor::zero_joint(arm, joint); break;
+		case 3: i2c_encs[1].set_home(); break;
+		case 4: CoProcessor::zero_joint(arm, joint); break;
+		case 5: i2c_encs[2].set_home(); break;
+		case 6: CoProcessor::zero_joint(arm, joint); break;
+	}
+}
+
+/**
+ * @brief Sets joint PID gains
+ * @param joint Joint index [0...6]
+ * @param kp P-gain [V/rad]
+ * @param ki I-gain [V/(rad*s)]
+ * @param kd D-gain [V/(rad/s)]
+ */
+void Arm::set_pid_gains(uint8_t joint, float kp, float ki, float kd)
+{
+	pos_ctrls[joint].set_gains(kp, ki, kd);
+}
+
+/**
+ * @brief Sets joint PID voltage limits
+ * @param joint Joint index [0...6]
+ * @param v_min Min voltage [V]
+ * @param v_max Max voltage [V]
+ */
+void Arm::set_pid_limits(uint8_t joint, float v_min, float v_max)
+{
+	pos_ctrls[joint].set_limits(v_min, v_max);
+}
+
+/**
+ * @brief Returns true if arm is enabled
+ */
+bool Arm::get_enabled()
+{
+	return enabled;
+}
+
+/**
  * @brief Returns current arm mode.
  */
 Arm::mode_t Arm::get_mode()
 {
 	return arm_mode;
+}
+
+/**
+ * @brief Returns joint calibration status
+ * @param joint Joint index [0...6]
+ */
+bool Arm::get_cal(uint8_t joint)
+{
+	return joint_cals[joint];
 }
 
 /**
