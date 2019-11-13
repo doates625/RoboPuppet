@@ -28,9 +28,6 @@
 [submodule "CppDeps/CppUtil"]
 	path = CppDeps/CppUtil
 	url = https://github.com/doates625/CppUtil.git
-[submodule "CppDeps/SerialC"]
-	path = CppDeps/SerialC
-	url = https://github.com/doates625/SerialC.git
 [submodule "CoProc/lib/i2c_t3"]
 	path = CoProc/lib/i2c_t3
 	url = https://github.com/nox771/i2c_t3.git
