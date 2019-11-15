@@ -6,6 +6,6 @@
 	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
 
 	<!-- RoboPuppet Node -->
-	<node pkg="robopuppet" type="RoboPuppet.py" name="RoboPuppet" output="screen"/>
+	<node pkg="robopuppet" type="robopuppet.py" name="RoboPuppet" output="screen"/>
 	
 </launch>

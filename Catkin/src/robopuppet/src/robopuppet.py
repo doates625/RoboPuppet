@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-RoboPuppet.py
+robopuppet.py
 ROS communication node between Baxter and RoboPuppet
 """
 
