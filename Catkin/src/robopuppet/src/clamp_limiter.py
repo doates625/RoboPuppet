@@ -12,7 +12,21 @@ class ClampLimiter:
 		:param val_min: Minimum output
 		:param val_max: Maximum output
 		"""
+		self.set_min(val_min)
+		self.set_max(val_max)
+	
+	def set_min(self, val_min):
+		"""
+		Update min output value
+		:param val_min: Min value
+		"""
 		self._val_min = val_min
+		
+	def set_max(self, val_max):
+		"""
+		Update max output value
+		:param val_max: Max value
+		"""
 		self._val_max = val_max
 		
 	def update(self, val):

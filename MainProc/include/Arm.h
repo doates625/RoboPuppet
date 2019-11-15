@@ -42,8 +42,11 @@ public:
 	void set_enabled(bool enabled);
 	void set_mode(mode_t arm_mode);
 	void zero_joint(uint8_t joint);
-	void set_pid_gains(uint8_t joint, float kp, float ki, float kd);
-	void set_pid_limits(uint8_t joint, float v_min, float v_max);
+	void set_pid_kp(uint8_t joint, float kp);
+	void set_pid_ki(uint8_t joint, float ki);
+	void set_pid_kd(uint8_t joint, float kd);
+	void set_pid_v_min(uint8_t joint, float v_min);
+	void set_pid_v_max(uint8_t joint, float v_max);
 
 	// Accessors
 	bool get_enabled();

@@ -256,26 +256,53 @@ void Arm::zero_joint(uint8_t joint)
 }
 
 /**
- * @brief Sets joint PID gains
+ * @brief Sets joint PID P-gain
  * @param joint Joint index [0...6]
  * @param kp P-gain [V/rad]
- * @param ki I-gain [V/(rad*s)]
- * @param kd D-gain [V/(rad/s)]
  */
-void Arm::set_pid_gains(uint8_t joint, float kp, float ki, float kd)
+void Arm::set_pid_kp(uint8_t joint, float kp)
 {
-	pos_ctrls[joint].set_gains(kp, ki, kd);
+	pos_ctrls[joint].set_kp(kp);
 }
 
 /**
- * @brief Sets joint PID voltage limits
+ * @brief Sets joint PID I-gain
+ * @param joint Joint index [0...6]
+ * @param ki I-gain [V/(rad*s)]
+ */
+void Arm::set_pid_ki(uint8_t joint, float ki)
+{
+	pos_ctrls[joint].set_ki(ki);
+}
+
+/**
+ * @brief Sets joint PID D-gain
+ * @param joint Joint index [0...6]
+ * @param kd D-gain [V/(rad/s)]
+ */
+void Arm::set_pid_kd(uint8_t joint, float kd)
+{
+	pos_ctrls[joint].set_kd(kd);
+}
+
+/**
+ * @brief Sets joint PID min voltage command
  * @param joint Joint index [0...6]
  * @param v_min Min voltage [V]
+ */
+void Arm::set_pid_v_min(uint8_t joint, float v_min)
+{
+	pos_ctrls[joint].set_u_min(v_min);
+}
+
+/**
+ * @brief Sets joint PID max voltage command
+ * @param joint Joint index [0...6]
  * @param v_max Max voltage [V]
  */
-void Arm::set_pid_limits(uint8_t joint, float v_min, float v_max)
+void Arm::set_pid_v_max(uint8_t joint, float v_max)
 {
-	pos_ctrls[joint].set_limits(v_min, v_max);
+	pos_ctrls[joint].set_u_max(v_max);
 }
 
 /**

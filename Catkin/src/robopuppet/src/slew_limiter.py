@@ -15,12 +15,28 @@ class SlewLimiter:
 		:param rate_max: Maximum rate of change (positive number)
 		:param f_sample: Sample frequency
 		"""
-		t_sample = 1.0 / f_sample
-		delta_min = rate_min * t_sample
-		delta_max = rate_max * t_sample
-		self._delta_clamper = ClampLimiter(delta_min, delta_max)
+		self._t_sample = 1.0 / f_sample
+		self._delta_clamper = ClampLimiter(0.0, 0.0)
+		self.set_min(rate_min)
+		self.set_max(rate_max)
 		self._val_prev = 0.0
 		self._first_frame = True
+	
+	def set_min(self, rate_min):
+		"""
+		Updates minimum rate of change
+		:param rate_min: Minimum rate (negative number)
+		"""
+		delta_min = rate_min * self._t_sample
+		self._delta_clamper.set_min(delta_min)
+	
+	def set_max(self, rate_max):
+		"""
+		Updates maximum rate of change
+		:param rate_max: Maximum rate (positive number)
+		"""
+		delta_max = rate_max * self._t_sample
+		self._delta_clamper.set_max(delta_max)
 	
 	def update(self, val):
 		"""
