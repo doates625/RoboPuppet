@@ -6,7 +6,7 @@
 	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
 
 	<!-- RoboPuppet Arm L -->
-	<node pkg="robopuppet" type="robopuppet.py" name="RoboPuppetL" output="screen">
+	<node pkg="robopuppet" type="rpnode.py" name="RoboPuppetL" output="screen">
 		<param name="side" type="str" value="L"/>
 		<param name="port" type="str" value="/dev/ttyACM0"/>
 		<param name="baud" type="int" value="115200"/>

@@ -55,27 +55,29 @@ gedit baxter/baxter.sh
 ### Test Simulator with Teensy
 - Install Visual Studio Code and the PlatformIO extension
 - Make sure the Teensy is still plugged in
-- Open the MainProc project in Platformio and open platformio.ini
+- Open the Firmware project in Platformio and open platformio.ini
 - Set the following build flags (comment and uncomment as needed):
 ```
 ; Build Flags
 build_flags =
-	-D PLATFORM_ARDUINO		; Platform library flag
-	-D PLATFORM_TEENSY		; Platform library flag
-	-D PLATFORM_3V3			; Platform operating voltage
-	;	-D SERIAL_DEBUG			; Serial debug printing in loop
-	;	-D STUB_ENCODERS		; Stubs I2C encoder communication
-	;	-D STUB_COPROCESSOR		; Stubs co-processor I2C communication
-	;	-D STUB_ROSCOMMS		; Stubs ROS serial comunication
-	-D LTIFILTER_MAX_A=10	; Max A coefficients for LTI filters
-	-D LTIFILTER_MAX_B=10	; Max B coefficients for LTI filters
+	-D PLATFORM_ARDUINO				; Arduino platform [Platform.h]
+	-D PLATFORM_3V3					; 3.3V board [Platform.h]
+	-D I2CDEVICE_BUFFER_SIZE=8		; I2C buffer size [I2CDevice.h]
+	-D SERIALSERVER_TX_MAX_IDS=20	; Max TX messages [SerialServer.h]
+	-D SERIALSERVER_RX_MAX_IDS=20	; Max RX messages [SerialServer.h]
+	-D SERIALSERVER_TX_MAX_LEN=20	; Max TX message length [SerialServer.h]
+	-D SERIALSERVER_RX_MAX_LEN=20	; Max RX message length [SerialServer.h]
+	;	-D STUB_GRIPPERS				; Stub grippers [Grippers.h]
+	;	-D STUB_HALL_ENCODERS			; Stub halls [HallEncoders.h]
+	;	-D STUB_QUAD_ENCODERS			; Stub quads [QuadEncoders.h]
+	;	-D SERIAL_DEBUG					; Serial printing [SerialDebug.h]
 ```
 - Build and upload the project to the Teensy
 - Run in terminal in Catkin directory:
 ```
 source devel/setup.bash
 ./src/baxter/baxter.sh sim
-roslaunch robopuppet RoboPuppet.xml
+roslaunch robopuppet robopuppet.xml
 ```
 - Verify Baxter is running:
 ```
