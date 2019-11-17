@@ -1,0 +1,16 @@
+<!-- RoboPuppet Launch File -->
+<!-- Launches Baxter simulation and RoboPuppet serial interface -->
+<launch>
+
+	<!-- Baxter Launch File -->
+	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
+
+	<!-- RoboPuppet Arm L -->
+	<node pkg="robopuppet" type="robopuppet.py" name="RoboPuppetL" output="screen">
+		<param name="side" type="str" value="L"/>
+		<param name="port" type="str" value="/dev/ttyACM0"/>
+		<param name="baud" type="int" value="115200"/>
+		<param name="file" type="str" value="$(find robopuppet)/config/arm_L.ini"/>
+	</node>
+	
+</launch>

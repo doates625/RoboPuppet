@@ -1,0 +1,48 @@
+[submodule "Firmware/lib/AnalogIn"]
+	path = Firmware/lib/AnalogIn
+	url = https://github.com/doates625/AnalogIn.git
+[submodule "Firmware/lib/AS5048B"]
+	path = Firmware/lib/AS5048B
+	url = https://github.com/doates625/AS5048B.git
+[submodule "Firmware/lib/ClampLimiter"]
+	path = Firmware/lib/ClampLimiter
+	url = https://github.com/doates625/ClampLimiter.git
+[submodule "Firmware/lib/CppUtil"]
+	path = Firmware/lib/CppUtil
+	url = https://github.com/doates625/CppUtil.git
+[submodule "Firmware/lib/DigitalIn"]
+	path = Firmware/lib/DigitalIn
+	url = https://github.com/doates625/DigitalIn.git
+[submodule "Firmware/lib/DigitalOut"]
+	path = Firmware/lib/DigitalOut
+	url = https://github.com/doates625/DigitalOut.git
+[submodule "Firmware/lib/I2CDevice"]
+	path = Firmware/lib/I2CDevice
+	url = https://github.com/doates625/I2CDevice.git
+[submodule "Firmware/lib/PID"]
+	path = Firmware/lib/PID
+	url = https://github.com/doates625/PID.git
+[submodule "Firmware/lib/Platform"]
+	path = Firmware/lib/Platform
+	url = https://github.com/doates625/Platform.git
+[submodule "Firmware/lib/PwmOut"]
+	path = Firmware/lib/PwmOut
+	url = https://github.com/doates625/PwmOut.git
+[submodule "Firmware/lib/QuadEncoder"]
+	path = Firmware/lib/QuadEncoder
+	url = https://github.com/doates625/QuadEncoder.git
+[submodule "Firmware/lib/QuadEncoderX"]
+	path = Firmware/lib/QuadEncoderX
+	url = https://github.com/doates625/QuadEncoderX.git
+[submodule "Firmware/lib/SerialServer"]
+	path = Firmware/lib/SerialServer
+	url = https://github.com/doates625/SerialServer.git
+[submodule "Firmware/lib/SlewLimiter"]
+	path = Firmware/lib/SlewLimiter
+	url = https://github.com/doates625/SlewLimiter.git
+[submodule "Firmware/lib/Struct"]
+	path = Firmware/lib/Struct
+	url = https://github.com/doates625/Struct.git
+[submodule "Firmware/lib/Timer"]
+	path = Firmware/lib/Timer
+	url = https://github.com/doates625/Timer.git
