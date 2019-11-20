@@ -5,11 +5,16 @@
 	<!-- Baxter Launch File -->
 	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
 
-	<!-- RoboPuppet Arm L -->
-	<node pkg="robopuppet" type="rpnode.py" name="RoboPuppetL" output="screen">
+	<!-- Arm L Controller -->
+	<node pkg="robopuppet" type="controller.py" name="controller_L" output="screen">
 		<param name="side" type="str" value="L"/>
 		<param name="port" type="str" value="/dev/ttyACM0"/>
 		<param name="baud" type="int" value="115200"/>
+	</node>
+	
+	<!-- Arm L Config Server -->
+	<node pkg="robopuppet" type="config.py" name="config_L" output="screen">
+		<param name="side" type="str" value="L"/>
 		<param name="file" type="str" value="$(find robopuppet)/config/arm_L.ini"/>
 	</node>
 	

@@ -1,0 +1,12 @@
+uint8 joint
+---
+float32 home_angle
+float32 angle_min
+float32 angle_max
+float32 velocity_min
+float32 velocity_max
+float32 voltage_min
+float32 voltage_max
+float32 pid_kp
+float32 pid_ki
+float32 pid_kd

@@ -1,22 +1,20 @@
 #!/usr/bin/env python
 
 """
-rpserial.py
-Serial communication class between Python and RoboPuppet arm microcontroller
+serial_comms.py
+Serial communication class between Python and RoboPuppet microcontroller
 Written by Dan Oates (WPI Class of 2020)
 """
 
-from rpconsts import *
+from constants import num_joints, num_grippers
 from serial import Serial
 from serial_server import SerialServer
-from ConfigParser import ConfigParser
 from struct import pack, unpack
-from time import sleep
 
 """
 Class Definition
 """
-class RoboPuppetSerial:
+class SerialComms():
 	
 	"""
 	Server Settings
@@ -27,13 +25,28 @@ class RoboPuppetSerial:
 	_msg_id_joint_state = 0x20
 	_msg_id_joint_config = 0x30
 	_msg_id_gripper = 0x40
+	_config_bytes = {
+		'home_angle': 0x00,
+		'angle_min': 0x01,
+		'angle_max': 0x02,
+		'velocity_min': 0x03,
+		'velocity_max': 0x04,
+		'voltage_min': 0x05,
+		'voltage_max': 0x06,
+		'pid_kp': 0x07,
+		'pid_ki': 0x08,
+		'pid_kd': 0x09,
+	}
+	_opmode_bytes = {
+		'limp': 0x00,
+		'hold': 0x01,
+	}
 
-	def __init__(self, port, baud, filename=None):
+	def __init__(self, port, baud):
 		"""
 		Constructs RoboPuppet serial interface
 		:param port: Serial port name [string]
 		:param baud: Baud rate [int]
-		:param filename: Config file name (.ini) [string]
 		"""
 		
 		# State Data
@@ -57,30 +70,6 @@ class RoboPuppetSerial:
 		self._tx_joint = None
 		self._tx_setting = None
 		self._tx_value = None
-		
-		# Config parsing
-		self._filename = filename
-		self._config = ConfigParser()
-		if self._filename is not None:
-		
-			# Parse existing file
-			self._config.read(self._filename)			
-			for joint in range(num_joints):
-				section = 'joint_%u' % joint
-				for setting in self._config.options(section):
-					value = self._config.getfloat(section, setting)
-					self.set_config(joint, setting, value)
-		
-		else:
-			
-			# Create new file with defaults
-			self._filename = 'arm.ini'
-			for joint in range(num_joints):
-				section = 'joint_%u' % joint
-				self._config.add_section(section)
-				for (setting, values) in configs.items():
-					self.set_config(joint, setting, values['default'])
-		
 	
 	def update(self):
 		"""
@@ -96,6 +85,7 @@ class RoboPuppetSerial:
 		"""
 		Sets puppet operating mode
 		:param opmode: Opmode [String]
+		:return: None
 		
 		Opmode options:
 		'limp': No motor actuation
@@ -138,35 +128,30 @@ class RoboPuppetSerial:
 		:param joint: Joint index [0...6]
 		:param setting: Config option [string]
 		:param value: Value to set [float]
+		:return: None
 		
 		Config options:
 		'home_angle' [rad]
-		'min_angle' [rad]
-		'max_angle' [rad]
-		'min_velocity' [rad/s]
-		'max_velocity' [rad/s]
-		'min_voltage' [V]
-		'max_voltage' [V]
+		'angle_min' [rad]
+		'angle_max' [rad]
+		'velocity_min' [rad/s]
+		'velocity_max' [rad/s]
+		'voltage_min' [V]
+		'voltage_max' [V]
 		'pid_kp' [V/rad]
 		'pid_ki' [V/(rad*s)]
 		'pid_kd' [V/(rad/s)]
 		"""
-		
-		# Send config to microcontroller
 		self._tx_joint = joint
 		self._tx_setting = setting
 		self._tx_value = value		
 		self._server.tx(self._msg_id_joint_config)
-		
-		# Update config file
-		section = 'joint_%u' % joint
-		self._config.set(section, setting, '%+.3f' % value)
-		self._config.write(open(self._filename, 'w'))
 	
 	def _msg_rx_heartbeat(self, data):
 		"""
 		Heartbeat RX callback
 		:param data: Message RX data (none)
+		:return: None
 		
 		Sets internal heartbeat flag
 		"""
@@ -176,18 +161,20 @@ class RoboPuppetSerial:
 		"""
 		Opmode TX callback
 		:param data: Message TX data
+		:return: None
 		
 		Data format:
 		[0-0]: Mode (enum)
 			   0x00 = Limp
 			   0x01 = Hold
 		"""
-		data[0] = self.opmodes[self._tx_opmode]
+		data[0] = self._opmode_bytes[self._tx_opmode]
 	
 	def _msg_rx_joint_state(self, data):
 		"""
 		Joint state RX callback
 		:param data: Message RX data
+		:return: None
 		
 		Data format:
 		[0-0]: Joint number (0-6)
@@ -206,6 +193,7 @@ class RoboPuppetSerial:
 		"""
 		Joint config TX callback
 		:param data: Message TX data
+		:return: None
 		
 		Data format:
 		[0-0]: Joint number (0-6)
@@ -220,13 +208,14 @@ class RoboPuppetSerial:
 		[2-5]: Setting (float32)
 		"""
 		data[0] = self._tx_joint
-		data[1] = configs[self._tx_setting]['byte']
+		data[1] = self._config_bytes[self._tx_setting]
 		data[2:6] = [ord(b) for b in pack('f', self._tx_value)]
 	
 	def _msg_rx_gripper(self, data):
 		"""
 		Gripper reading RX callback
 		:param data: Message RX data
+		:return: None
 		
 		Data format:
 		[0-0]: Gripper number (0-3)
@@ -236,65 +225,3 @@ class RoboPuppetSerial:
 		reading = unpack('f', bytearray(data[1:5]))[0]
 		self._grippers[index] = reading
 
-"""
-Main Function (demo)
-"""
-if __name__ == '__main__':
-
-	# Init puppet interface
-	port = '/dev/ttyACM0'
-	baud = 115200
-	filename = 'arm.ini'
-	puppet = RoboPuppetSerial(port, baud, filename)
-	
-	# Demo printouts
-	print('RoboPuppet Serial Test')
-	while True:
-	
-		# Update puppet
-		print('State Update:')
-		got_heartbeat = puppet.update()
-		
-		# Heartbeat status
-		print('Heartbeat: ' + str(got_heartbeat))
-		
-		# Angles
-		print('Joint Angles:')
-		for j in range(num_joints):
-			print('\t%i: %+.2f' % (j, puppet.get_angle(j)))
-		
-		# Calibrations
-		print('Joint Cals:')
-		for j in range(num_joints):
-			print('\t%i: ' % (j,) + str(puppet.is_calibrated(j)))
-			
-		# Voltages
-		print('Joint Voltages:')
-		for j in range(num_joints):
-			print('\t%i: %+.2f' % (j, puppet.get_voltage(j)))
-		
-		# Gripper readings
-		print('Grippers Readings:')
-		for g in range(num_grippers):
-			print('\t%i: %+.2f' % (g, puppet.get_gripper(g)))
-		
-		# Limit print rate
-		sleep(0.1)
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	
-	

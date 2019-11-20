@@ -1,36 +1,42 @@
 #!/usr/bin/env python
 
 """
-rpnode.py
-Communication node between ROS, baxter, and RoboPuppet
+controller.py
+Control node for RoboPuppet and Baxter
+Written by Dan Oates (WPI Class of 2020)
 """
 
+import constants
+from constants import num_joints, num_grippers
+from robopuppet.srv import GetConfig
 import rospy
 from rospy import Publisher, Subscriber
 from std_msgs.msg import Empty, Bool, String, Float32
 import baxter_interface
 from baxter_interface import CHECK_VERSION
-from rpserial import RoboPuppetSerial
-from rpconsts import *
+from serial_comms import SerialComms
 
 """
 Class Definition
 """
-class RoboPuppetNode():
+class Controller():
 
 	def __init__(self):
 		"""
-		Constructs RoboPuppet node
+		Initializes Controller Node
+		- Creates Baxter controllers
+		- Creates RoboPuppet serial interface
+		- Subscribes to ROS command topics
+		- Loads robot parameters from config file node
 		"""
 		
 		# Init ROS node
-		rospy.init_node('RoboPuppet')
+		rospy.init_node('controller')
 		
 		# Get params from server
 		side = rospy.get_param('~side')
 		port = rospy.get_param('~port')
 		baud = rospy.get_param('~baud')
-		filename = rospy.get_param('~file')
 		
 		# Baxter interfaces
 		self._enabler = baxter_interface.RobotEnable(CHECK_VERSION)
@@ -42,13 +48,13 @@ class RoboPuppetNode():
 		self._gripper.open()
 		
 		# Serial interface
-		self._puppet = RoboPuppetSerial(port, baud, filename)
+		self._puppet = SerialComms(port, baud)
 		
 		# ROS topics
 		self._topics = dict()
 		tn = '/puppet/arm_' + side
 		self._topics['heartbeat'] = Publisher(tn + '/heartbeat', Empty, queue_size=10)
-		self._topics['opmode'] = Subscriber(tn + '/opmode', String, self._topic_opmode)
+		self._topics['opmode'] = Subscriber(tn + '/opmode', String, self._msg_opmode)
 		self._topics['joint'] = dict()
 		for j in range(num_joints):
 			tnj = tn + '/joint_' + str(j)
@@ -56,17 +62,35 @@ class RoboPuppetNode():
 			topics['calibrated'] = Publisher(tnj + '/calibrated', Bool, queue_size=10)
 			topics['angle'] = Publisher(tnj + '/angle', Float32, queue_size=10)
 			topics['voltage'] = Publisher(tnj + '/voltage', Float32, queue_size=10)
-			for name in configs.keys():
-				topics[name] = Subscriber(tnj + '/' + name, Float32, self._topic_config, (j, name,))
+			for name in constants.config_names:
+				topics[name] = Subscriber(tnj + '/' + name, Float32, self._msg_config, (j, name,))
 			self._topics['joint'][j] = topics
 		self._topics['gripper'] = dict()
 		for g in range(num_grippers):
 			tng = tn + '/gripper_' + str(g)
 			self._topics['gripper'][g] = Publisher(tng, Float32, queue_size=10)
+		
+		# Load settings from config
+		name = 'get_config_' + side
+		rospy.wait_for_service(name)
+		proxy = rospy.ServiceProxy(name, GetConfig)
+		for j in range(num_joints):
+			resp = proxy(j)
+			self._puppet.set_config(j, 'home_angle', resp.home_angle)
+			self._puppet.set_config(j, 'angle_min', resp.angle_min)
+			self._puppet.set_config(j, 'angle_max', resp.angle_max)
+			self._puppet.set_config(j, 'velocity_min', resp.velocity_min)
+			self._puppet.set_config(j, 'velocity_max', resp.velocity_max)
+			self._puppet.set_config(j, 'voltage_min', resp.voltage_min)
+			self._puppet.set_config(j, 'voltage_max', resp.voltage_max)
+			self._puppet.set_config(j, 'pid_kp', resp.pid_kp)
+			self._puppet.set_config(j, 'pid_ki', resp.pid_ki)
+			self._puppet.set_config(j, 'pid_kd', resp.pid_kd)
 	
 	def update(self):
 		"""
 		Processes all TX and RX messages from RoboPuppet
+		:return: None
 		"""
 		
 		# Read message and heartbeat
@@ -92,18 +116,20 @@ class RoboPuppetNode():
 		for g in range(num_grippers):
 			self._topics['gripper'][g].publish(Float32(self._puppet.get_gripper(g)))
 	
-	def _topic_opmode(self, msg):
+	def _msg_opmode(self, msg):
 		"""
 		Sets puppet opmode from message
 		:param msg: Opmode [std_msgs/String]
+		:return: None
 		"""
 		self._puppet.set_opmode(msg.data)
 	
-	def _topic_config(self, msg, args):
+	def _msg_config(self, msg, args):
 		"""
 		Sets puppet config value from message
 		:param msg: Value [std_msgs/Float32]
 		:param args: Setting args
+		:return: None
 		
 		Setting args:
 		args[0] = Joint index [0...6]
@@ -112,16 +138,12 @@ class RoboPuppetNode():
 		joint, setting = args
 		self._puppet.set_config(joint, setting, msg.data)
 
+"""
+Main Function
+"""
 if __name__ == '__main__':
-	"""
-	Node Launcher Function
-	"""
-	
-	# Create node instance
-	node = RoboPuppetNode()
-	
-	# Loop node updates
-	rate = rospy.Rate(comm_rate)
+	node = Controller()
+	rate = rospy.Rate(constants.comm_rate)
 	while not rospy.is_shutdown():
 		node.update()
 		rate.sleep()

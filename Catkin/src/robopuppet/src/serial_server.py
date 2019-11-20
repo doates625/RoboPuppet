@@ -1,12 +1,16 @@
+#!/usr/bin/env python
+
 """
-serial_server
+serial_server.py
 Class for transmitting, receiving, and processing serial data packets
 Written by Dan Oates (WPI Class of 2020)
 """
 
 from struct import pack, unpack
 
-
+"""
+Class Definition
+"""
 class SerialServer:
 
     def __init__(self, serial, start_byte=0x00):
@@ -25,12 +29,6 @@ class SerialServer:
         self._rx_funcs = []
         self._tx_data = []
         self._rx_data = []
-
-    def get_serial(self):
-        """
-        Returns internal serial interface
-        """
-        return self._serial
 
     def add_tx(self, msg_id, data_len, func=None):
         """
@@ -62,21 +60,12 @@ class SerialServer:
         :param msg_id: ID of message to transmit
         :return: True if ID was valid, false otherwise
         """
-        if msg_id is not None:
-            try:
-                tx_i = self._tx_ids.index(msg_id)
-            except ValueError:
-                return False
-            self._tx_index(tx_i)
-            return True
-
-    def tx_all(self):
-        """
-        Transmits all messages in server once
-        :return: None
-        """
-        for tx_i in range(len(self._tx_ids)):
-            self._tx_index(tx_i)
+        try:
+            tx_i = self._tx_ids.index(msg_id)
+        except ValueError:
+            return False
+        self._tx_index(tx_i)
+        return True
 
     def _tx_index(self, tx_i):
         """
