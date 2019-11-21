@@ -26,6 +26,9 @@ namespace Motors
 	PwmOut* pwms_fwd[num_joints];
 	PwmOut* pwms_rev[num_joints];
 
+	// Motor signs
+	float signs[num_joints];
+
 	// Init flag
 	bool init_complete = false;
 }
@@ -47,6 +50,12 @@ void Motors::init()
 			pwms_rev[j] = new PwmOut(pins_rev[j]);
 		}
 
+		// Set motor signs to default +1
+		for (uint8_t j = 0; j < num_joints; j++)
+		{
+			signs[j] = +1.0f;
+		}
+
 		// Set init flag
 		init_complete = true;
 	}
@@ -64,6 +73,16 @@ void Motors::set_enabled(bool enabled)
 }
 
 /**
+ * @brief Sets sign direction of motor
+ * @param joint Joint index [0...6]
+ * @param sign Direction [+1 = default, -1 = flipped]
+ */
+void Motors::set_sign(uint8_t joint, float sign)
+{
+	signs[joint] = sign;
+}
+
+/**
  * @brief Sets motor voltage
  * @param joint Joint index [0...7]
  * @param voltage Voltage command [V]
@@ -73,6 +92,9 @@ void Motors::set_enabled(bool enabled)
  */
 void Motors::set_voltage(uint8_t joint, float voltage)
 {
+	// Correct sign direction
+	voltage *= signs[joint];
+	
 	// Calculate duty cycle
 	float duty = fabsf(voltage * motor_vcc_inv);
 	duty = clamp(duty, 0.0f, 1.0f);

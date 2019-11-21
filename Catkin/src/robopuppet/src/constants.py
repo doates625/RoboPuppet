@@ -20,4 +20,6 @@ config_names = [
 	'pid_kp',
 	'pid_ki',
 	'pid_kd',
+	'sign_angle',
+	'sign_motor',
 ]

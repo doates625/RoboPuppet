@@ -36,6 +36,8 @@ class Config():
 		('pid_kp',			+0.000),
 		('pid_ki',			+0.000),
 		('pid_kd',			+0.000),
+		('sign_angle',		+1.000),
+		('sign_motor',		+1.000),
 	])
 
 	def __init__(self):
@@ -63,7 +65,8 @@ class Config():
 				section = 'joint_%u' % j
 				self._parser.add_section(section)
 				for (setting, value) in self._default_configs.items():
-					self._parser.set(section, setting, value)
+					self._parser.set(section, setting, '%+.3f' % value)
+			self._parser.write(open(self._filename, 'w'))
 		
 		# Subscribe to config topics
 		self._subs = dict()
@@ -95,7 +98,9 @@ class Config():
 			self._parser.getfloat(section, 'voltage_max'),
 			self._parser.getfloat(section, 'pid_kp'),
 			self._parser.getfloat(section, 'pid_ki'),
-			self._parser.getfloat(section, 'pid_kd'))
+			self._parser.getfloat(section, 'pid_kd'),
+			self._parser.getfloat(section, 'sign_angle'),
+			self._parser.getfloat(section, 'sign_motor'))
 		return response
 	
 	def _msg_config(self, msg, args):

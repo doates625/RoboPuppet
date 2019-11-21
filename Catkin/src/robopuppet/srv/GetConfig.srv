@@ -10,3 +10,5 @@ float32 voltage_max
 float32 pid_kp
 float32 pid_ki
 float32 pid_kd
+float32 sign_angle
+float32 sign_motor

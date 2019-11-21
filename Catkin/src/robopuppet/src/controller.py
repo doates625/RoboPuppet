@@ -86,6 +86,8 @@ class Controller():
 			self._puppet.set_config(j, 'pid_kp', resp.pid_kp)
 			self._puppet.set_config(j, 'pid_ki', resp.pid_ki)
 			self._puppet.set_config(j, 'pid_kd', resp.pid_kd)
+			self._puppet.set_config(j, 'sign_angle', resp.sign_angle)
+			self._puppet.set_config(j, 'sign_motor', resp.sign_motor)
 	
 	def update(self):
 		"""

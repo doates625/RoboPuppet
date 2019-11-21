@@ -3,8 +3,10 @@
  * @author Dan Oates (WPI Class of 2020)
  */
 #include <Encoders.h>
+#include <RoboPuppet.h>
 #include <QuadEncoders.h>
 #include <HallEncoders.h>
+using RoboPuppet::num_joints;
 
 /**
  * Private subsystem info
@@ -12,6 +14,7 @@
 namespace Encoders
 {
 	bool init_complete = false;
+	float signs[num_joints];
 	bool is_quad(uint8_t joint);
 }
 
@@ -22,8 +25,17 @@ void Encoders::init()
 {
 	if (!init_complete)
 	{
+		// Init dependent subsystems
 		QuadEncoders::init();
 		HallEncoders::init();
+
+		// Set joint signs to default +1
+		for (uint8_t j = 0; j < num_joints; j++)
+		{
+			signs[j] = +1.0f;
+		}
+
+		// Set init flag
 		init_complete = true;
 	}
 }
@@ -35,9 +47,20 @@ void Encoders::init()
  */
 void Encoders::set_home(uint8_t joint, float home_angle)
 {
+	home_angle *= signs[joint];
 	is_quad(joint) ?
 		QuadEncoders::set_home(joint, home_angle) :
 		HallEncoders::set_home(joint, home_angle);
+}
+
+/**
+ * @brief Sets sign direction of encoder
+ * @param joint Joint index [0...6]
+ * @param sign Direction [+1 = default, -1 = flipped]
+ */
+void Encoders::set_sign(uint8_t joint, float sign)
+{
+	signs[joint] = sign;
 }
 
 /**
@@ -55,7 +78,7 @@ bool Encoders::is_calibrated(uint8_t joint)
  */
 float Encoders::get_angle(uint8_t joint)
 {
-	return is_quad(joint) ?
+	return signs[joint] * is_quad(joint) ?
 		QuadEncoders::get_angle(joint) :
 		HallEncoders::get_angle(joint);
 }

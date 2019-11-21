@@ -10,5 +10,6 @@ namespace Motors
 {
 	void init();
 	void set_enabled(bool enabled);
+	void set_sign(uint8_t joint, float sign);
 	void set_voltage(uint8_t joint, float voltage);
 }

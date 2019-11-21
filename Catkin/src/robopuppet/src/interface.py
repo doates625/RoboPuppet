@@ -119,6 +119,8 @@ class Interface():
 		'pid_kp' [V/rad]
 		'pid_ki' [V/(rad*s)]
 		'pid_kd' [V/(rad/s)]
+		'sign_angle' [+1, -1]
+		'sign_motor' [+1, -1]
 		"""
 		self._topics['joint'][joint][setting].publish(Float32(value))
 	

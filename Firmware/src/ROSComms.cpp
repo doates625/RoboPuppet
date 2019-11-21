@@ -184,6 +184,8 @@ void ROSComms::msg_tx_joint_state(uint8_t* data)
  *        0x07 = PID P-gain [V/rad]
  *        0x08 = PID I-gain [V/(rad*s)]
  *        0x09 = PID D-gain [V/(rad/s)]
+ *        0x0A = Angle sign [+1, -1]
+ *        0x0B = Motor sign [+1, -1]
  * [2-5]: Setting (float32)
  */
 void ROSComms::msg_rx_joint_config(uint8_t* data)
@@ -207,6 +209,8 @@ void ROSComms::msg_rx_joint_config(uint8_t* data)
 		case 0x07: Controllers::set_pid_kp(joint, setting); break;
 		case 0x08: Controllers::set_pid_ki(joint, setting); break;
 		case 0x09: Controllers::set_pid_kd(joint, setting); break;
+		case 0x0A: Encoders::set_sign(joint, setting); break;
+		case 0x0B: Motors::set_sign(joint, setting); break;
 	}
 }
 

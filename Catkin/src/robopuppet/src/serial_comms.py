@@ -36,6 +36,8 @@ class SerialComms():
 		'pid_kp': 0x07,
 		'pid_ki': 0x08,
 		'pid_kd': 0x09,
+		'sign_angle': 0x0A,
+		'sign_motor': 0x0B,
 	}
 	_opmode_bytes = {
 		'limp': 0x00,
@@ -141,6 +143,8 @@ class SerialComms():
 		'pid_kp' [V/rad]
 		'pid_ki' [V/(rad*s)]
 		'pid_kd' [V/(rad/s)]
+		'sign_angle' [+1, -1]
+		'sign_motor' [+1, -1]
 		"""
 		self._tx_joint = joint
 		self._tx_setting = setting
@@ -205,6 +209,11 @@ class SerialComms():
 			   0x04 = Max velocity [rad]
 			   0x05 = Min voltage [V]
 			   0x06 = Max voltage [V]
+			   0x07 = PID P-gain [V/rad]
+			   0x08 = PID I-gain [V/(rad*s)]
+			   0x09 = PID D-gain [V/(rad/s)]
+			   0x0A = Angle sign [+1, -1]
+			   0x0B = Motor sign [+1, -1]
 		[2-5]: Setting (float32)
 		"""
 		data[0] = self._tx_joint
