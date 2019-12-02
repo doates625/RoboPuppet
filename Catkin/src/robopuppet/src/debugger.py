@@ -19,9 +19,13 @@ if __name__ == '__main__':
 	# Initialize node
 	rospy.init_node('debugger')
 	side = 'L' # rospy.get_param('~side')
+	puppet = Interface(side)
+	
+	# Proportional control demo
+	puppet.set_config(3, 'pid_kp', 3.0)
+	puppet.set_opmode('hold')
 	
 	# Print loop
-	puppet = Interface(side)
 	while not rospy.is_shutdown():
 	
 		# Print state
