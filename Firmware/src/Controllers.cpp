@@ -7,8 +7,10 @@
 #include <AngleFilters.h>
 #include <Motors.h>
 #include <PID.h>
+#include <CppUtil.h>
 using RoboPuppet::num_joints;
 using RoboPuppet::f_ctrl;
+using CppUtil::wrap;
 
 /**
  * Private subsystem info
@@ -88,7 +90,11 @@ void Controllers::update()
 		// For each joint
 		for (uint8_t j = 0; j < num_joints; j++)
 		{
+			// Compute angular error
 			float error = setpoints[j] - AngleFilters::get(j, false);
+			error = wrap(error, -M_PI, +M_PI);
+
+			// Set voltage command
 			voltages[j] = controllers[j]->update(error);
 			Motors::set_voltage(j, voltages[j]);
 		}
