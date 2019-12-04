@@ -13,6 +13,7 @@ from constants import num_joints
 from constants import num_grippers
 from interface import Interface
 from Tkinter import *
+from ttk import Notebook
 from threading import Thread
 
 """
@@ -21,26 +22,27 @@ Constants
 UPDATE_RATE = 10.0
 
 """
-Class Definition
+Main Tab Class
 """
-class GUI:
-
-	def __init__(self):
+class MainTab:
+	
+	def __init__(self, parent, puppet):
 		"""
-		Initializes GUI node
+		Creates GUI main tab
+		:param parent: Tab parent [Notebook]
+		:param puppet: RoboPuppet [Interface]
 		"""
 		
-		# ROS Inits
-		rospy.init_node('gui')
-		side = 'L' # rospy.get_param('~side')
-		# puppet = Interface(side)
+		# Copy interface pointer
+		self._puppet = puppet
 		
-		# Tkinter Root
-		self._root = self._make_root(side)
-		self._fr_root = self._make_fr_root(self._root)
+		# Create frame
+		self._fr = Frame(parent)
+		self._fr.pack()
+		parent.add(self._fr, text='Main')
 		
 		# Heartbeat GUI
-		self._fr_top = self._make_fr_top(self._fr_root)
+		self._fr_top = self._make_fr_top(self._fr)
 		self._fr_hb = self._make_fr_hb(self._fr_top)
 		self._lb_hb = self._make_lb_hb(self._fr_hb)
 		
@@ -50,38 +52,14 @@ class GUI:
 		self._sv_om = self._make_rbs_om(self._fr_om)
 		
 		# Joint State GUI
-		self._lb_js = self._make_lb_js(self._fr_root)
-		self._fr_js = self._make_fr_js(self._fr_root)
+		self._lb_js = self._make_lb_js(self._fr)
+		self._fr_js = self._make_fr_js(self._fr)
 		self._lbs_js = self._make_lbs_js(self._fr_js)
 		
 		# Gripper State GUI
-		self._lb_gs = self._make_lb_gs(self._fr_root)
-		self._fr_gs = self._make_fr_gs(self._fr_root)
+		self._lb_gs = self._make_lb_gs(self._fr)
+		self._fr_gs = self._make_fr_gs(self._fr)
 		self._lbs_gs = self._make_lbs_gs(self._fr_gs)
-		
-		# Start Tkinter
-		self._update_ms = int(1000 / UPDATE_RATE)
-		self._root.after(self._update_ms, self._update)
-		self._root.mainloop()
-	
-	def _make_root(self, side):
-		"""
-		Creates, inits, and returns Tkinter root
-		:param side: Puppet arm side ['L', 'R']
-		"""
-		root = Tk()
-		root.title('RoboPuppet Arm ' + side)
-		return root
-	
-	def _make_fr_root(self, parent):
-		"""
-		Creates and returns root frame
-		:param parent: Parent frame (root)
-		"""
-		frame = Frame(parent, width=600, height=300)
-		frame.pack_propagate(False)
-		frame.pack()
-		return frame
 	
 	def _make_fr_top(self, parent):
 		"""
@@ -244,13 +222,88 @@ class GUI:
 			labels[g]['value'].grid(row=1, column=g, sticky=N+S+E+W)
 			Grid.columnconfigure(parent, g, weight=1)
 		return labels
+	
+	def update(self):
+		"""
+		Updates GUI labels
+		"""
+		# TODO Update GUI with interface
+		pass
 
+"""
+Joint Tab Class
+"""
+class JointTab:
+	
+	def __init__(self, parent, puppet, joint):
+		"""
+		Creates GUI joint tab
+		:param parent: Tab parent [Notebook]
+		:param puppet: RoboPuppet [Interface]
+		:param joint: Joint index [0...6]
+		"""
+		
+		# Save arguments
+		self._puppet = puppet
+		self._joint = joint
+		
+		# Create frame
+		self._fr = Frame(parent)
+		self._fr.pack()
+		parent.add(self._fr, text=('Joint %u' % self._joint))
+	
+	def update(self):
+		"""
+		Updates GUI plots and labels
+		"""
+		# TODO update GUI with interface
+		pass
+
+"""
+GUI Class
+"""
+class GUI:
+
+	def __init__(self):
+		"""
+		Initializes GUI node
+		"""
+		
+		# ROS Inits
+		rospy.init_node('gui')
+		side = 'L' # rospy.get_param('~side')
+		puppet = None # Interface(side)
+		
+		# Tkinter Root
+		self._root = Tk()
+		self._root.title('RoboPuppet Arm ' + side)
+		self._fr_root = Frame(self._root, width=600, height=300)
+		self._fr_root.pack_propagate(False)
+		self._fr_root.pack()
+		self._nb = Notebook(self._fr_root)
+		self._nb.pack(expand=True, fill='both')
+		
+		# Tabs
+		self._tab_main = MainTab(self._nb, puppet)
+		self._tab_joints = []
+		for j in range(num_joints):
+			self._tab_joints.append(JointTab(self._nb, puppet, j))
+		
+		# Start Tkinter
+		self._nb.enable_traversal()
+		self._update_ms = int(1000 / UPDATE_RATE)
+		self._root.after(self._update_ms, self._update)
+		self._root.mainloop()
+	
 	def _update(self):
 		"""
 		Updates GUI with RoboPuppet data
 		"""
 		
-		# TODO update GUI labels
+		# Update tabs
+		self._tab_main.update()
+		for tab in self._tab_joints:
+			tab.update()
 		
 		# Schedule next update or shutdown
 		if rospy.is_shutdown():
