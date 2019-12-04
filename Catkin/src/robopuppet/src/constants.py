@@ -23,3 +23,7 @@ config_names = [
 	'sign_angle',
 	'sign_motor',
 ]
+opmode_names = [
+	'limp',
+	'hold',
+]
