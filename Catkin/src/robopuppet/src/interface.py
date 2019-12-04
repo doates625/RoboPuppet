@@ -52,9 +52,7 @@ class Interface():
 		
 		# Config service proxy
 		name = 'get_config_' + side
-		print('Waiting for service...')
 		rospy.wait_for_service(name)
-		print('Done!')
 		self._proxy = rospy.ServiceProxy(name, GetConfig)
 		
 		# Heartbeat timer
