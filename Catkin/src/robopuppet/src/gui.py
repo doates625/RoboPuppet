@@ -8,6 +8,7 @@ Written by Dan Oates (WPI Class of 2020)
 
 import rospy
 from constants import num_joints
+from interface import Interface
 from Tkinter import Tk
 from Tkinter import Frame
 from ttk import Notebook
@@ -32,7 +33,7 @@ class GUI:
 		# ROS Inits
 		rospy.init_node('gui')
 		side = 'L' # rospy.get_param('~side')
-		puppet = None # Interface(side)
+		puppet = Interface(side)
 		
 		# Tkinter Root
 		self._root = Tk()
@@ -40,9 +41,9 @@ class GUI:
 		self._fr_root = Frame(self._root, width=800, height=800)
 		self._fr_root.pack()
 		self._nb = Notebook(self._fr_root)
-		self._nb.pack(expand=True, fill='both')
+		self._nb.pack(fill='both', expand=True)
 		
-		# Tabs
+		# GUI Tabs
 		self._tab_main = MainTab(self._nb, puppet)
 		self._tab_joints = []
 		for j in range(num_joints):
@@ -50,7 +51,7 @@ class GUI:
 		
 		# Start Tkinter
 		self._nb.enable_traversal()
-		self._update_ms = int(1000 / UPDATE_RATE)
+		self._update_ms = int(1000.0 / UPDATE_RATE)
 		self._root.after(self._update_ms, self._update)
 		self._root.mainloop()
 	

@@ -1,5 +1,0 @@
-<!-- RoboPuppet GUI Launch File -->
-<!-- Runs GUI in isolation with no RoboPuppet nodes -->
-<launch>
-	<node pkg="robopuppet" type="gui.py" name="gui" output="screen"/>
-</launch>

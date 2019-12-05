@@ -96,8 +96,8 @@ class MainTab:
 		Creates opmode label
 		:param parent: Parent frame
 		"""
-		self._fr_om = Label(parent, text='Opmode')
-		self._fr_om.pack(side='top')
+		self._lb_om = Label(parent, text='Opmode')
+		self._lb_om.pack(side='top')
 	
 	def _make_rbs_om(self, parent):
 		"""
@@ -112,6 +112,14 @@ class MainTab:
 			self._rbs_om[name] = Radiobutton(
 				parent, text=name, variable=self._sv_om, value=name, indicatoron=0)
 			self._rbs_om[name].pack(side='left', expand=True, fill='both')
+		self._sv_om.trace('w', self._opmode_cb)
+	
+	def _opmode_cb(self, *argv):
+		"""
+		Sends opmode command to RoboPuppet when radio button changes
+		"""
+		opmode = self._sv_om.get()
+		self._puppet.set_opmode(opmode)
 	
 	def _make_lb_js(self, parent):
 		"""
@@ -208,6 +216,25 @@ class MainTab:
 		"""
 		Updates GUI labels
 		"""
-		# TODO Update GUI with interface
+		
+		# Update last heartbeat time
+		last_hb = self._puppet.get_last_heartbeat()
+		self._lb_hb.config(text=('Last Heartbeat: %.2f' % last_hb))
+		
+		# Update joint angles
+		for j in range(num_joints):
+			cal = 'True' if self._puppet.is_calibrated(j) else 'False'
+			angle = self._puppet.get_angle(j)
+			voltage = self._puppet.get_voltage(j)
+			self._lbs_js[j]['cal'].config(text=cal)
+			self._lbs_js[j]['angle'].config(text=('%+.2f' % angle))
+			self._lbs_js[j]['voltage'].config(text=('%+.2f' % voltage))
+		
+		# Update gripper readings
+		for g in range(num_grippers):
+			reading = self._puppet.get_gripper(g)
+			self._lbs_gs[g]['value'].config(text=('%.2f' % reading))
+		
+		# TODO opmode switch check
 		pass
 
