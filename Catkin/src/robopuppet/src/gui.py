@@ -38,7 +38,7 @@ class GUI:
 		# Tkinter Root
 		self._root = Tk()
 		self._root.title('RoboPuppet Arm ' + side)
-		self._fr_root = Frame(self._root, width=800, height=800)
+		self._fr_root = Frame(self._root)
 		self._fr_root.pack()
 		self._nb = Notebook(self._fr_root)
 		self._nb.pack(fill='both', expand=True)

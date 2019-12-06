@@ -128,7 +128,7 @@ class Interface():
 		:param joint: Joint index [0...6]
 		:return: Joint config [GetConfig]
 		"""
-		return self._proxy(j)
+		return self._proxy(joint)
 	
 	def _msg_heartbeat(self, msg):
 		"""
