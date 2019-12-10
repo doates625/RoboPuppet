@@ -19,6 +19,9 @@
 	</node>
 	
 	<!-- Arm L GUI -->
-	<node pkg="robopuppet" type="gui.py" name="gui" output="screen"/>
+	<node pkg="robopuppet" type="gui.py" name="gui" output="screen">
+		<param name="side" type="str" value="L"/>
+		<param name="debug" type="bool" value="true"/>
+	</node>
 	
 </launch>

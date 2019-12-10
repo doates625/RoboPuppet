@@ -9,6 +9,7 @@ Written by Dan Oates (WPI Class of 2020)
 num_joints = 7
 num_grippers = 4
 comm_rate = 10.0
+frame_rate = 8.0
 motor_vcc = 7.2
 config_names = [
 	'home_angle',

@@ -28,13 +28,15 @@ class MainTab:
 		:param puppet: RoboPuppet [Interface]
 		"""
 		
-		# Copy interface pointer
+		# Copy arguments
+		self._parent = parent
 		self._puppet = puppet
 		
 		# Create frame
 		self._fr = Frame(parent)
 		self._fr.pack()
-		parent.add(self._fr, text='Main')
+		self._tab_name = 'Main'
+		parent.add(self._fr, text=self._tab_name)
 		
 		# Heartbeat GUI
 		self._make_fr_top(self._fr)
@@ -214,27 +216,25 @@ class MainTab:
 	
 	def update(self):
 		"""
-		Updates GUI labels
+		Updates GUI labels if tab is selected
 		"""
+		if self._parent.tab(self._parent.select(), 'text') == self._tab_name:
 		
-		# Update last heartbeat time
-		last_hb = self._puppet.get_last_heartbeat()
-		self._lb_hb.config(text=('Last Heartbeat: %.2f' % last_hb))
+			# Update last heartbeat time
+			last_hb = self._puppet.get_last_heartbeat()
+			self._lb_hb.config(text=('Last Heartbeat: %.2f' % last_hb))
 		
-		# Update joint angles
-		for j in range(num_joints):
-			cal = 'True' if self._puppet.is_calibrated(j) else 'False'
-			angle = self._puppet.get_angle(j)
-			voltage = self._puppet.get_voltage(j)
-			self._lbs_js[j]['cal'].config(text=cal)
-			self._lbs_js[j]['angle'].config(text=('%+.2f' % angle))
-			self._lbs_js[j]['voltage'].config(text=('%+.2f' % voltage))
+			# Update joint angles
+			for j in range(num_joints):
+				cal = 'True' if self._puppet.is_calibrated(j) else 'False'
+				angle = self._puppet.get_angle(j)
+				voltage = self._puppet.get_voltage(j)
+				self._lbs_js[j]['cal'].config(text=cal)
+				self._lbs_js[j]['angle'].config(text=('%+.2f' % angle))
+				self._lbs_js[j]['voltage'].config(text=('%+.2f' % voltage))
 		
-		# Update gripper readings
-		for g in range(num_grippers):
-			reading = self._puppet.get_gripper(g)
-			self._lbs_gs[g]['value'].config(text=('%.2f' % reading))
-		
-		# TODO opmode switch check
-		pass
+			# Update gripper readings
+			for g in range(num_grippers):
+				reading = self._puppet.get_gripper(g)
+				self._lbs_gs[g]['value'].config(text=('%.2f' % reading))
 

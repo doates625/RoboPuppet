@@ -18,6 +18,8 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from constants import motor_vcc
 from constants import config_names
+from constants import frame_rate
+from live_plot import LivePlot
 from math import pi
 
 """
@@ -29,6 +31,8 @@ PLOT_ANGLE_MIN = -pi
 PLOT_ANGLE_MAX = +pi
 PLOT_VOLTAGE_MIN = -motor_vcc
 PLOT_VOLTAGE_MAX = +motor_vcc
+PLOT_COLOR_J = 'b'
+PLOT_COLOR_V = 'r'
 
 """
 Joint Tab Class
@@ -44,13 +48,15 @@ class JointTab:
 		"""
 		
 		# Save arguments
+		self._parent = parent
 		self._puppet = puppet
 		self._joint = joint
 		
 		# Create frame
 		self._fr = Frame(parent)
 		self._fr.pack()
-		parent.add(self._fr, text=('Joint %u' % self._joint))
+		self._tab_name = 'Joint %u' % self._joint
+		parent.add(self._fr, text=self._tab_name)
 		
 		# Joint and voltage plots
 		self._make_fr_plt(self._fr)
@@ -87,6 +93,13 @@ class JointTab:
 		self._axs_jp.grid()
 		self._fig_jp.tight_layout()
 		
+		# Create live plot
+		self._live_plot_jp = LivePlot(
+			self._axs_jp,
+			PLOT_COLOR_J,
+			PLOT_DURATION,
+			frame_rate)
+		
 		# Create canvas
 		self._cv_jp = FigureCanvasTkAgg(self._fig_jp, master=parent)
 		self._cv_jp.get_tk_widget().pack(side='top', fill='both')
@@ -108,6 +121,13 @@ class JointTab:
 		self._axs_vp.set_ylim(PLOT_VOLTAGE_MIN, PLOT_VOLTAGE_MAX)
 		self._axs_vp.grid()
 		self._fig_vp.tight_layout()
+		
+		# Create live plot
+		self._live_plot_vp = LivePlot(
+			self._axs_vp,
+			PLOT_COLOR_V,
+			PLOT_DURATION,
+			frame_rate)
 		
 		# Create canvas
 		self._cv_vp = FigureCanvasTkAgg(self._fig_vp, master=parent)
@@ -202,8 +222,13 @@ class JointTab:
 	
 	def update(self):
 		"""
-		Updates GUI plots
+		Updates GUI plots if tab is selected
 		"""
-		# TODO
-		pass
-
+		angle = self._puppet.get_angle(self._joint)
+		voltage = self._puppet.get_voltage(self._joint)
+		render = self._parent.tab(self._parent.select(), 'text') == self._tab_name
+		self._live_plot_jp.update(angle, render)
+		self._live_plot_vp.update(voltage, render)
+		if render:
+			self._cv_jp.draw()
+			self._cv_vp.draw()
