@@ -10,11 +10,10 @@ References:
 - http://wiki.ros.org/ROS/Tutorials/WritingServiceClient%28python%29
 - http://wiki.ros.org/ROS/Tutorials/CreatingMsgAndSrv
 """
-
-from constants import num_joints
-from robopuppet.srv import GetConfig, GetConfigResponse
 import rospy
 from rospy import Subscriber
+from constants import num_joints
+from robopuppet.srv import GetConfig, GetConfigResponse
 from std_msgs.msg import Float32
 from ConfigParser import ConfigParser
 from collections import OrderedDict
@@ -52,12 +51,12 @@ class Config():
 		rospy.init_node('config')
 	
 		# Get params from server
-		side = rospy.get_param('~side')
-		self._filename = rospy.get_param('~file')
+		self._arm_side = rospy.get_param('~arm_side')
+		self._file_name = rospy.get_param('~file_name')
 	
 		# Attempt to parse config file
 		self._parser = ConfigParser()
-		read_files = self._parser.read(self._filename)
+		read_files = self._parser.read(self._file_name)
 		
 		# Create file if nonexistent
 		if len(read_files) == 0:
@@ -66,11 +65,11 @@ class Config():
 				self._parser.add_section(section)
 				for (setting, value) in self._default_configs.items():
 					self._parser.set(section, setting, '%+.3f' % value)
-			self._parser.write(open(self._filename, 'w'))
+			self._parser.write(open(self._file_name, 'w'))
 		
 		# Subscribe to config topics
 		self._subs = dict()
-		tn = '/puppet/arm_' + side
+		tn = '/puppet/arm_' + self._arm_side
 		for j in range(num_joints):
 			tnn = tn + '/joint_%u' % j
 			self._subs[j] = dict()
@@ -79,7 +78,7 @@ class Config():
 				self._subs[j][name] = Subscriber(tnnn, Float32, self._msg_config, (j, name))
 		
 		# Create joint config service
-		name = 'get_config_' + side
+		name = 'get_config_' + self._arm_side
 		self._service = rospy.Service(name, GetConfig, self._srv_config)
 	
 	def _srv_config(self, req):
@@ -116,7 +115,7 @@ class Config():
 		joint, setting = args
 		section = 'joint_%u' % joint
 		self._parser.set(section, setting, '%+.3f' % msg.data)
-		self._parser.write(open(self._filename, 'w'))
+		self._parser.write(open(self._file_name, 'w'))
 
 """
 Main Function

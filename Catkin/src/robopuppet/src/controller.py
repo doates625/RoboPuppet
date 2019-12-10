@@ -6,13 +6,14 @@ Control node for RoboPuppet and Baxter
 Written by Dan Oates (WPI Class of 2020)
 """
 
-import constants
-from constants import num_joints, num_grippers
-from robopuppet.srv import GetConfig
 import rospy
+import baxter_interface as baxter
 from rospy import Publisher, Subscriber
+from constants import num_joints
+from constants import num_grippers
+from constants import config_names
+from robopuppet.srv import GetConfig
 from std_msgs.msg import Empty, Bool, String, Float32
-import baxter_interface
 from baxter_interface import CHECK_VERSION
 from serial_comms import SerialComms
 
@@ -34,25 +35,25 @@ class Controller():
 		rospy.init_node('controller')
 		
 		# Get params from server
-		side = rospy.get_param('~side')
-		port = rospy.get_param('~port')
-		baud = rospy.get_param('~baud')
+		arm_side = rospy.get_param('~arm_side')
+		port_name = rospy.get_param('~port_name')
+		baud_rate = rospy.get_param('~baud_rate')
 		
 		# Baxter interfaces
-		self._enabler = baxter_interface.RobotEnable(CHECK_VERSION)
+		self._enabler = baxter.RobotEnable(CHECK_VERSION)
 		self._enabler.enable()
-		limb_name = ('left' if side == 'L' else 'right')
-		self._arm = baxter_interface.Limb(limb_name)
+		limb_name = ('left' if arm_side == 'L' else 'right')
+		self._arm = baxter.Limb(limb_name)
 		self._joint_names = self._arm.joint_names()
-		self._gripper = baxter_interface.Gripper(limb_name, CHECK_VERSION)
+		self._gripper = baxter.Gripper(limb_name, CHECK_VERSION)
 		self._gripper.open()
 		
 		# Serial interface
-		self._puppet = SerialComms(port, baud)
+		self._puppet = SerialComms(port_name, baud_rate)
 		
 		# ROS topics
 		self._topics = dict()
-		tn = '/puppet/arm_' + side
+		tn = '/puppet/arm_' + arm_side
 		self._topics['heartbeat'] = Publisher(tn + '/heartbeat', Empty, queue_size=10)
 		self._topics['opmode'] = Subscriber(tn + '/opmode', String, self._msg_opmode)
 		self._topics['joint'] = dict()
@@ -62,7 +63,7 @@ class Controller():
 			topics['calibrated'] = Publisher(tnj + '/calibrated', Bool, queue_size=10)
 			topics['angle'] = Publisher(tnj + '/angle', Float32, queue_size=10)
 			topics['voltage'] = Publisher(tnj + '/voltage', Float32, queue_size=10)
-			for name in constants.config_names:
+			for name in config_names:
 				topics[name] = Subscriber(tnj + '/' + name, Float32, self._msg_config, (j, name,))
 			self._topics['joint'][j] = topics
 		self._topics['gripper'] = dict()
@@ -71,7 +72,7 @@ class Controller():
 			self._topics['gripper'][g] = Publisher(tng, Float32, queue_size=10)
 		
 		# Load settings from config
-		name = 'get_config_' + side
+		name = 'get_config_' + arm_side
 		rospy.wait_for_service(name)
 		proxy = rospy.ServiceProxy(name, GetConfig)
 		for j in range(num_joints):
@@ -145,7 +146,8 @@ Main Function
 """
 if __name__ == '__main__':
 	node = Controller()
-	rate = rospy.Rate(constants.comm_rate)
+	comm_rate = rospy.get_param('~comm_rate')
+	rate = rospy.Rate(comm_rate)
 	while not rospy.is_shutdown():
 		node.update()
 		rate.sleep()

@@ -1,0 +1,33 @@
+<!-- RoboPuppet Arm Launch File -->
+<!-- Launches Baxter simulation and RoboPuppet serial interface -->
+<launch>
+	
+	<!-- Arguments -->
+	<arg name="arm_side" default="L" doc="Arm side [L, R]"/>
+	<arg name="port_name" default="/dev/ttyACM0" doc="Serial port name"/>
+	<arg name="comm_rate" default="10.0" doc="Communication rate [Hz]"/>
+	<arg name="frame_rate" default="8.0" doc="GUI framerate [Hz]"/>
+	<arg name="debug_mode" default="true" doc="Debug mode flag [Bool]"/>
+
+	<!-- Controller -->
+	<node pkg="robopuppet" type="controller.py" name="controller_L" output="screen">
+		<param name="arm_side" type="str" value="$(arg arm_side)"/>
+		<param name="port_name" type="str" value="$(arg port_name)"/>
+		<param name="baud_rate" type="int" value="115200"/>
+		<param name="comm_rate" type="double" value="$(arg comm_rate)"/>
+	</node>
+	
+	<!-- Config Server -->
+	<node pkg="robopuppet" type="config.py" name="config_L" output="screen">
+		<param name="arm_side" type="str" value="$(arg arm_side)"/>
+		<param name="file_name" type="str" value="$(find robopuppet)/config/arm_L.ini"/>
+	</node>
+	
+	<!-- GUI -->
+	<node pkg="robopuppet" type="gui.py" name="gui" output="screen">
+		<param name="arm_side" type="str" value="$(arg arm_side)"/>
+		<param name="frame_rate" type="double" value="$(arg frame_rate)"/>
+		<param name="debug_mode" type="bool" value="$(arg debug_mode)"/>
+	</node>
+	
+</launch>

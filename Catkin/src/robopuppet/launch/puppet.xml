@@ -1,0 +1,30 @@
+<!-- RoboPuppet Launch File -->
+<!-- Launches RoboPuppet arm launch files -->
+<launch>
+
+	<!-- Arguments -->
+	<arg name="comm_rate" default="10.0" doc="Communication rate [Hz]"/>
+	<arg name="frame_rate" default="8.0" doc="GUI framerate [Hz]"/>
+	<arg name="debug_mode" default="true" doc="Debug mode flag [Bool]"/>
+	
+	<!-- Arm-L Launch File -->
+	<include file="$(find robopuppet)/launch/arm.xml">
+		<arg name="arm_side" value="L"/>
+		<arg name="port_name" value="/dev/ttyACM0"/>
+		<arg name="comm_rate" value="$(arg comm_rate)"/>
+		<arg name="frame_rate" value="$(arg frame_rate)"/>
+		<arg name="debug_mode" value="$(arg debug_mode)"/>
+	</include>
+	
+	<!-- Arm-R Launch File -->
+	<!--
+	<include file="$(find robopuppet)/launch/arm.xml">
+		<arg name="arm_side" value="R"/>
+		<arg name="port_name" value="/dev/ttyACM0"/>
+		<arg name="comm_rate" value="$(arg comm_rate)"/>
+		<arg name="frame_rate" value="$(arg frame_rate)"/>
+		<arg name="debug_mode" value="$(arg debug_mode)"/>
+	</include>
+	-->
+
+</launch>

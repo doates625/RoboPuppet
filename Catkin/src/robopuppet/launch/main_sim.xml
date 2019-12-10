@@ -1,0 +1,20 @@
+<!-- RoboPuppet Main Simulation Launch File -->
+<!-- Launches Baxter simulation and RoboPuppet launch files -->
+<launch>
+
+	<!-- Arguments -->
+	<arg name="comm_rate" default="10.0" doc="Communication rate [Hz]"/>
+	<arg name="frame_rate" default="8.0" doc="GUI framerate [Hz]"/>
+	<arg name="debug_mode" default="true" doc="Debug mode flag [Bool]"/>
+
+	<!-- Baxter Simulator Launch File -->
+	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
+	
+	<!-- RoboPuppet Launch File -->
+	<include file="$(find robopuppet)/launch/puppet.xml">
+		<arg name="comm_rate" value="$(arg comm_rate)"/>
+		<arg name="frame_rate" value="$(arg frame_rate)"/>
+		<arg name="debug_mode" value="$(arg debug_mode)"/>
+	</include>
+	
+</launch>
