@@ -78,9 +78,9 @@ bool Encoders::is_calibrated(uint8_t joint)
  */
 float Encoders::get_angle(uint8_t joint)
 {
-	return signs[joint] * is_quad(joint) ?
+	return signs[joint] * (is_quad(joint) ?
 		QuadEncoders::get_angle(joint) :
-		HallEncoders::get_angle(joint);
+		HallEncoders::get_angle(joint));
 }
 
 /**

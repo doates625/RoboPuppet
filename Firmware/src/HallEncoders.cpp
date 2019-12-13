@@ -20,9 +20,9 @@ namespace HallEncoders
 	const uint8_t num_encs = 3;
 	const uint8_t enc_addrs[num_encs] =
 	{
-		0x00,	// Joint 1
-		0x48,	// Joint 3
-		0x49,	// Joint 5
+		0x48,	// Joint 1
+		0x49,	// Joint 3
+		0x4A,	// Joint 5
 	};
 	AS5048B* encoders[num_encs];
 

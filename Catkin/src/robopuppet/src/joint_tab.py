@@ -218,7 +218,8 @@ class JointTab:
 				value = float(svar.get())
 				self._puppet.set_config(self._joint, name, value)
 			except ValueError:
-				svar.set('FORMAT ERROR')
+				pass
+		self._bt_get_cb()
 	
 	def update(self):
 		"""
