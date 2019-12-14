@@ -30,7 +30,7 @@
 	</node>
 	
 	<!-- GUI -->
-	<node pkg="robopuppet" type="gui.py" name="gui" output="screen">
+	<node pkg="robopuppet" type="gui.py" name="gui_$(arg arm_side)" output="screen">
 		<param name="arm_side" type="str" value="$(arg arm_side)"/>
 		<param name="frame_rate" type="double" value="$(arg frame_rate)"/>
 		<param name="debug_mode" type="bool" value="$(arg debug_mode)"/>
