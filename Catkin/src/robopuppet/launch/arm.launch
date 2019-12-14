@@ -1,5 +1,5 @@
 <!-- RoboPuppet Arm Launch File -->
-<!-- Launches RoboPuppet nodes for arm L or R -->
+<!-- Launches RoboPuppet nodes for L or R side -->
 <launch>
 	
 	<!-- Arguments -->
@@ -9,7 +9,7 @@
 	<arg name="frame_rate" default="8.0" doc="GUI framerate [Hz]"/>
 	<arg name="debug_mode" default="true" doc="Debug mode flag [Bool]"/>
 
-	<!-- Controller -->
+	<!-- Puppet Controller -->
 	<node pkg="robopuppet" type="controller.py" name="controller_$(arg arm_side)" output="screen">
 		<param name="arm_side" type="str" value="$(arg arm_side)"/>
 		<param name="port_name" type="str" value="$(arg port_name)"/>
@@ -23,13 +23,13 @@
 		<param name="comm_rate" type="double" value="$(arg comm_rate)"/>
 	</node>
 	
-	<!-- Config Server -->
+	<!-- Config File Manager -->
 	<node pkg="robopuppet" type="config.py" name="config_$(arg arm_side)" output="screen">
 		<param name="arm_side" type="str" value="$(arg arm_side)"/>
 		<param name="file_name" type="str" value="$(find robopuppet)/config/arm_$(arg arm_side).ini"/>
 	</node>
 	
-	<!-- GUI -->
+	<!-- Control GUI -->
 	<node pkg="robopuppet" type="gui.py" name="gui_$(arg arm_side)" output="screen">
 		<param name="arm_side" type="str" value="$(arg arm_side)"/>
 		<param name="frame_rate" type="double" value="$(arg frame_rate)"/>
