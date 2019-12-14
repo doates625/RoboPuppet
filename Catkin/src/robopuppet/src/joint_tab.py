@@ -17,6 +17,7 @@ from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from constants import motor_vcc
+from constants import config_fmt
 from constants import config_names
 from live_plot import LivePlot
 from math import pi
@@ -196,18 +197,18 @@ class JointTab:
 		Updates config text fields with current config values
 		"""
 		configs = self._puppet.get_configs(self._joint)
-		self._cfg_svs['home_angle'].set('%+.3f' % configs.home_angle)
-		self._cfg_svs['angle_min'].set('%+.3f' % configs.angle_min)
-		self._cfg_svs['angle_max'].set('%+.3f' % configs.angle_max)
-		self._cfg_svs['velocity_min'].set('%+.3f' % configs.velocity_min)
-		self._cfg_svs['velocity_max'].set('%+.3f' % configs.velocity_max)
-		self._cfg_svs['voltage_min'].set('%+.3f' % configs.voltage_min)
-		self._cfg_svs['voltage_max'].set('%+.3f' % configs.voltage_max)
-		self._cfg_svs['pid_kp'].set('%+.3f' % configs.pid_kp)
-		self._cfg_svs['pid_ki'].set('%+.3f' % configs.pid_ki)
-		self._cfg_svs['pid_kd'].set('%+.3f' % configs.pid_kd)
-		self._cfg_svs['sign_angle'].set('%+.3f' % configs.sign_angle)
-		self._cfg_svs['sign_motor'].set('%+.3f' % configs.sign_motor)
+		self._cfg_svs['home_angle'].set(config_fmt % configs.home_angle)
+		self._cfg_svs['angle_min'].set(config_fmt % configs.angle_min)
+		self._cfg_svs['angle_max'].set(config_fmt % configs.angle_max)
+		self._cfg_svs['velocity_min'].set(config_fmt % configs.velocity_min)
+		self._cfg_svs['velocity_max'].set(config_fmt % configs.velocity_max)
+		self._cfg_svs['voltage_min'].set(config_fmt % configs.voltage_min)
+		self._cfg_svs['voltage_max'].set(config_fmt % configs.voltage_max)
+		self._cfg_svs['pid_kp'].set(config_fmt % configs.pid_kp)
+		self._cfg_svs['pid_ki'].set(config_fmt % configs.pid_ki)
+		self._cfg_svs['pid_kd'].set(config_fmt % configs.pid_kd)
+		self._cfg_svs['sign_angle'].set(config_fmt % configs.sign_angle)
+		self._cfg_svs['sign_motor'].set(config_fmt % configs.sign_motor)
 	
 	def _bt_set_cb(self):
 		"""
