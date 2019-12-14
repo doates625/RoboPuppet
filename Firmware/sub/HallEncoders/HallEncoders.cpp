@@ -38,7 +38,6 @@ namespace HallEncoders
  */
 void HallEncoders::init()
 {
-#if !defined(STUB_HALL_ENCODERS)
 	if (!init_complete)
 	{
 		// Init I2C bus
@@ -56,7 +55,6 @@ void HallEncoders::init()
 		// Set init flag
 		init_complete = true;
 	}
-#endif
 }
 
 /**
@@ -66,10 +64,8 @@ void HallEncoders::init()
  */
 void HallEncoders::set_home(uint8_t joint, float home_angle)
 {
-#if !defined(STUB_HALL_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	encoders[index]->set_home(home_angle);
-#endif
 }
 
 /**
@@ -78,12 +74,8 @@ void HallEncoders::set_home(uint8_t joint, float home_angle)
  */
 float HallEncoders::get_angle(uint8_t joint)
 {
-#if !defined(STUB_HALL_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	return encoders[index]->get_angle();
-#else
-	return 0.0f;
-#endif
 }
 
 /**

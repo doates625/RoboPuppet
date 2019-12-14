@@ -47,7 +47,6 @@ namespace QuadEncoders
  */
 void QuadEncoders::init()
 {
-#if !defined(STUB_QUAD_ENCODERS)
 	if (!init_complete)
 	{
 		// Create encoders
@@ -78,7 +77,6 @@ void QuadEncoders::init()
 		// Set init flag
 		init_complete = true;
 	}
-#endif
 }
 
 /**
@@ -88,10 +86,8 @@ void QuadEncoders::init()
  */
 void QuadEncoders::set_home(uint8_t joint, float home_angle)
 {
-#if !defined(STUB_QUAD_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	encoders[index]->set_home(home_angle);
-#endif
 }
 
 /**
@@ -100,12 +96,8 @@ void QuadEncoders::set_home(uint8_t joint, float home_angle)
  */
 bool QuadEncoders::is_calibrated(uint8_t joint)
 {
-#if !defined(STUB_QUAD_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	return encoders[index]->is_calibrated();
-#else
-	return true;
-#endif
 }
 
 /**
@@ -114,12 +106,8 @@ bool QuadEncoders::is_calibrated(uint8_t joint)
  */
 float QuadEncoders::get_angle(uint8_t joint)
 {
-#if !defined(STUB_QUAD_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	return encoders[index]->get_angle();
-#else
-	return 0.0f;
-#endif
 }
 
 /**
