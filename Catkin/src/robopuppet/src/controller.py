@@ -33,6 +33,7 @@ class Controller:
 		- Creates RoboPuppet serial interface
 		- Subscribes to ROS command topics
 		- Loads robot parameters from config file node
+		- Sets opmode to limp
 		"""
 		
 		# Init ROS node
@@ -94,6 +95,9 @@ class Controller:
 			self._puppet.set_config(j, 'pid_kd', resp.pid_kd)
 			self._puppet.set_config(j, 'sign_angle', resp.sign_angle)
 			self._puppet.set_config(j, 'sign_motor', resp.sign_motor)
+		
+		# Set opmode to 'limp'
+		self._puppet.set_opmode('limp')
 	
 	def update(self):
 		"""
