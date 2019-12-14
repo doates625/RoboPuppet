@@ -19,6 +19,8 @@ class Gripper:
 	def __init__(self):
 		"""
 		Initializes gripper controller
+		- Creates RoboPuppet ROS interface
+		- Creates Baxter gripper interface
 		"""
 		
 		# Init ROS node
@@ -34,7 +36,7 @@ class Gripper:
 	
 	def update(self):
 		"""
-		Updates gripper
+		Updates gripper command with new reading(s)
 		:return: None
 		"""
 		if self._puppet.get_gripper(0) > 0.5:
