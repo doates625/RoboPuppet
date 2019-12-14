@@ -23,6 +23,10 @@ class GUI:
 	def __init__(self):
 		"""
 		Initializes GUI node
+		- Creates Tkinter root
+		- Creates GUI tab(s)
+		- Configures update loop
+		- Starts Tkinter main loop
 		"""
 		
 		# ROS Inits
@@ -56,7 +60,7 @@ class GUI:
 	
 	def _update(self):
 		"""
-		Updates GUI with RoboPuppet data
+		Updates GUI tab(s) with new RoboPuppet data
 		:return: None
 		"""
 		
