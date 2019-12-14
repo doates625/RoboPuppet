@@ -2,7 +2,7 @@
 
 """
 controller.py
-Control node for RoboPuppet and Baxter
+RoboPuppet interface and Baxter arm control node
 Written by Dan Oates (WPI Class of 2020)
 """
 
@@ -45,8 +45,6 @@ class Controller():
 		limb_name = ('left' if arm_side == 'L' else 'right')
 		self._arm = baxter.Limb(limb_name)
 		self._joint_names = self._arm.joint_names()
-		self._gripper = baxter.Gripper(limb_name, CHECK_VERSION)
-		self._gripper.open()
 		
 		# Serial interface
 		self._puppet = SerialComms(port_name, baud_rate)
@@ -100,15 +98,11 @@ class Controller():
 		if self._puppet.update():
 			self._topics['heartbeat'].publish(Empty())
 		
-		# Control Baxter
+		# Control Baxter joints
 		angles = [0.0] * num_joints
 		for j in range(num_joints):
 			angles[j] = self._puppet.get_angle(j)
 			self._arm.set_joint_positions({self._joint_names[j]: angles[j]})
-		if self._puppet.get_gripper(0) > 0.5:
-			self._gripper.close()
-		else:
-			self._gripper.open()
 			
 		# Publish ROS state topics
 		for j in range(num_joints):
