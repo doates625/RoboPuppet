@@ -45,6 +45,9 @@ class Controller():
 		limb_name = ('left' if arm_side == 'L' else 'right')
 		self._arm = baxter.Limb(limb_name)
 		self._joint_names = self._arm.joint_names()
+		self._joint_angles = dict()
+		for j in range(num_joints):
+			self._joint_angles[self._joint_names[j]] = 0.0
 		
 		# Serial interface
 		self._puppet = SerialComms(port_name, baud_rate)
@@ -99,10 +102,9 @@ class Controller():
 			self._topics['heartbeat'].publish(Empty())
 		
 		# Control Baxter joints
-		angles = [0.0] * num_joints
 		for j in range(num_joints):
-			angles[j] = self._puppet.get_angle(j)
-			self._arm.set_joint_positions({self._joint_names[j]: angles[j]})
+			self._joint_angles[self._joint_names[j]] = self._puppet.get_angle(j)
+		self._arm.set_joint_positions(self._joint_angles)
 			
 		# Publish ROS state topics
 		for j in range(num_joints):
