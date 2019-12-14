@@ -11,7 +11,7 @@
 #include <Controllers.h>
 #include <ROSComms.h>
 #include <DigitalOut.h>
-using RoboPuppet::t_ctrl_us;
+using RoboPuppet::f_ctrl;
 
 /**
  * Global Variables
@@ -51,6 +51,7 @@ void setup()
 	ROSComms::init();
 
 	// Start control ISR
+	const float t_ctrl_us = 1000000.0f / f_ctrl;
 	ctrl_timer.begin(ctrl_update, t_ctrl_us);
 }
 

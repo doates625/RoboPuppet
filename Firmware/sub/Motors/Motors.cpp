@@ -8,7 +8,7 @@
 #include <PwmOut.h>
 #include <CppUtil.h>
 using RoboPuppet::num_joints;
-using RoboPuppet::motor_vcc_inv;
+using RoboPuppet::motor_vcc;
 using CppUtil::clamp;
 
 /**
@@ -16,6 +16,9 @@ using CppUtil::clamp;
  */
 namespace Motors
 {
+	// Inverse of Vcc
+	const float motor_vcc_inv = 1.0f / motor_vcc;
+	
 	// Pin definitions
 	const uint8_t pin_en = 2;
 	const uint8_t pins_fwd[num_joints] = { 3, 5, 7,  9, 29, 35, 37 };
