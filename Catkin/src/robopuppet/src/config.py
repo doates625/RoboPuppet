@@ -24,7 +24,7 @@ class Config():
 		"""
 		Initializes Config Node
 		- Opens or creates config file
-		- Creates GetConfig services
+		- Creates GetConfig service
 		- Subscribes to config topics
 		"""
 		
