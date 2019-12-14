@@ -2,7 +2,7 @@
 
 """
 controller.py
-RoboPuppet interface and Baxter arm control node
+RoboPuppet and Baxter arm control node
 Written by Dan Oates (WPI Class of 2020)
 """
 
@@ -65,7 +65,7 @@ class Controller():
 			topics['angle'] = Publisher(tnj + '/angle', Float32, queue_size=10)
 			topics['voltage'] = Publisher(tnj + '/voltage', Float32, queue_size=10)
 			for name in config_names:
-				topics[name] = Subscriber(tnj + '/' + name, Float32, self._msg_config, (j, name,))
+				topics[name] = Subscriber(tnj + '/' + name, Float32, self._msg_config, (j, name))
 			self._topics['joint'][j] = topics
 		self._topics['gripper'] = dict()
 		for g in range(num_grippers):
@@ -97,11 +97,11 @@ class Controller():
 		:return: None
 		"""
 		
-		# Read message and heartbeat
+		# Read messages and heartbeat
 		if self._puppet.update():
 			self._topics['heartbeat'].publish(Empty())
 		
-		# Control Baxter joints
+		# Command Baxter joints
 		for j in range(num_joints):
 			self._joint_angles[self._joint_names[j]] = self._puppet.get_angle(j)
 		self._arm.set_joint_positions(self._joint_angles)
