@@ -10,7 +10,6 @@
 #include <Motors.h>
 #include <Controllers.h>
 #include <ROSComms.h>
-#include <SerialDebug.h>
 #include <DigitalOut.h>
 using RoboPuppet::t_ctrl_us;
 
@@ -50,9 +49,6 @@ void setup()
 	AngleFilters::init();
 	Controllers::init();
 	ROSComms::init();
-	#if defined(SERIAL_DEBUG)
-		SerialDebug::init();
-	#endif
 
 	// Start control ISR
 	ctrl_timer.begin(ctrl_update, t_ctrl_us);
@@ -66,8 +62,4 @@ void setup()
 void loop()
 {
 	ROSComms::update();
-	#if defined(SERIAL_DEBUG)
-		SerialDebug::print();
-		Platform::wait_ms(250);
-	#endif
 }
