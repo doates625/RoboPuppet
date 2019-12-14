@@ -13,7 +13,7 @@
 	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
 	
 	<!-- RoboPuppet Launch File -->
-	<include file="$(find robopuppet)/launch/puppet.xml">
+	<include file="$(find robopuppet)/launch/puppet.launch">
 		<arg name="comm_rate" value="$(arg comm_rate)"/>
 		<arg name="frame_rate" value="$(arg frame_rate)"/>
 		<arg name="debug_mode" value="$(arg debug_mode)"/>

@@ -73,7 +73,7 @@ build_flags =
 ```
 source devel/setup.bash
 ./src/baxter/baxter.sh sim
-roslaunch robopuppet main_sim.xml
+roslaunch robopuppet main_sim.launch
 ```
 - Verify Baxter is running:
 ```
