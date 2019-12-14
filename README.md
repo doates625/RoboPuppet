@@ -67,10 +67,6 @@ build_flags =
 	-D SERIALSERVER_RX_MAX_IDS=20	; Max RX messages [SerialServer.h]
 	-D SERIALSERVER_TX_MAX_LEN=20	; Max TX message length [SerialServer.h]
 	-D SERIALSERVER_RX_MAX_LEN=20	; Max RX message length [SerialServer.h]
-	;	-D STUB_GRIPPERS				; Stub grippers [Grippers.h]
-	;	-D STUB_HALL_ENCODERS			; Stub halls [HallEncoders.h]
-	;	-D STUB_QUAD_ENCODERS			; Stub quads [QuadEncoders.h]
-	;	-D SERIAL_DEBUG					; Serial printing [SerialDebug.h]
 ```
 - Build and upload the project to the Teensy
 - Run in terminal in Catkin directory:
