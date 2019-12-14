@@ -20,7 +20,7 @@ from serial_comms import SerialComms
 """
 Class Definition
 """
-class Controller():
+class Controller:
 
 	def __init__(self):
 		"""

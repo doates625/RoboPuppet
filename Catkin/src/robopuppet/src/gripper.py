@@ -14,7 +14,7 @@ from baxter_interface import CHECK_VERSION
 """
 Class Definition
 """
-class Gripper():
+class Gripper:
 
 	def __init__(self):
 		"""

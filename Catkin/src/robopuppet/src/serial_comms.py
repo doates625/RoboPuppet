@@ -14,7 +14,7 @@ from struct import pack, unpack
 """
 Class Definition
 """
-class SerialComms():
+class SerialComms:
 	
 	"""
 	Server Settings

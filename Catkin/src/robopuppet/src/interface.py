@@ -16,7 +16,7 @@ from time import time
 """
 Class Definition
 """
-class Interface():
+class Interface:
 
 	def __init__(self, side):
 		"""

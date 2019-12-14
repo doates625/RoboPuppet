@@ -18,7 +18,7 @@ from ConfigParser import ConfigParser
 """
 Class Definition
 """
-class Config():
+class Config:
 
 	def __init__(self):
 		"""
