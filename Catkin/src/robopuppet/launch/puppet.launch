@@ -1,5 +1,5 @@
 <!-- RoboPuppet Launch File -->
-<!-- Launches RoboPuppet arm launch files -->
+<!-- Launches RoboPuppet arm launch files for L and R -->
 <launch>
 
 	<!-- Arguments -->

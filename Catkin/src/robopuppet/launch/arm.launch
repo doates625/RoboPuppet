@@ -1,5 +1,5 @@
 <!-- RoboPuppet Arm Launch File -->
-<!-- Launches Baxter simulation and RoboPuppet serial interface -->
+<!-- Launches RoboPuppet nodes for arm L or R -->
 <launch>
 	
 	<!-- Arguments -->
