@@ -8,11 +8,12 @@ Written by Dan Oates (WPI Class of 2020)
 
 import rospy
 from rospy import Subscriber
+from std_msgs.msg import Float32
+from robopuppet.srv import GetConfig
+from robopuppet.srv import GetConfigResponse
 from constants import num_joints
 from constants import config_fmt
 from constants import config_defaults
-from robopuppet.srv import GetConfig, GetConfigResponse
-from std_msgs.msg import Float32
 from ConfigParser import ConfigParser
 
 """

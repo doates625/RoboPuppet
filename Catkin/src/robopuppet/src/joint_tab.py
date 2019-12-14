@@ -12,13 +12,11 @@ from Tkinter import Button
 from Tkinter import Entry
 from Tkinter import StringVar
 from Tkinter import Grid
-from Tkinter import N, S, E, W
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
-from constants import motor_vcc
 from constants import config_fmt
 from constants import config_names
+from constants import motor_vcc
 from live_plot import LivePlot
 from math import pi
 
@@ -150,7 +148,7 @@ class JointTab:
 		:param parent: Parent frame
 		"""
 		self._lb_cfg = Label(parent, text='Settings')
-		self._lb_cfg.grid(row=0, columnspan=2, sticky=N+S+E+W)
+		self._lb_cfg.grid(row=0, columnspan=2, sticky='NSEW')
 	
 	def _make_cfgs(self, parent):
 		"""
@@ -165,11 +163,11 @@ class JointTab:
 		
 		# Get button
 		self._bt_get = Button(parent, text='Get', command=self._bt_get_cb)
-		self._bt_get.grid(row=1, column=0, sticky=N+S+E+W)
+		self._bt_get.grid(row=1, column=0, sticky='NSEW')
 		
 		# Set button
 		self._bt_set = Button(parent, text='Set', command=self._bt_set_cb)
-		self._bt_set.grid(row=1, column=1, sticky=N+S+E+W)
+		self._bt_set.grid(row=1, column=1, sticky='NSEW')
 		
 		# Config labels and fields
 		self._cfg_lbs = dict()
@@ -179,8 +177,8 @@ class JointTab:
 			svar = StringVar()
 			label = Label(parent, text=name)
 			entry = Entry(parent, textvariable=svar)
-			label.grid(row=i+2, column=0, sticky=N+S+E+W)
-			entry.grid(row=i+2, column=1, sticky=N+S+E+W)
+			label.grid(row=i+2, column=0, sticky='NSEW')
+			entry.grid(row=i+2, column=1, sticky='NSEW')
 			self._cfg_lbs[name] = label
 			self._cfg_ets[name] = entry
 			self._cfg_svs[name] = svar

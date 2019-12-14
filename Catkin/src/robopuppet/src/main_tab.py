@@ -11,7 +11,6 @@ from Tkinter import Label
 from Tkinter import StringVar
 from Tkinter import Radiobutton
 from Tkinter import Grid
-from Tkinter import N, S, E, W
 from constants import num_joints
 from constants import num_grippers
 from constants import opmode_names
@@ -164,7 +163,7 @@ class MainTab:
 		self._lbs_js['title'] = dict()
 		for (t, title) in enumerate(titles):
 			label = Label(parent, text=titles[t])
-			label.grid(row=0, column=t, sticky=N+S+E+W)
+			label.grid(row=0, column=t, sticky='NSEW')
 			self._lbs_js['title'][t] = label
 			Grid.columnconfigure(parent, t, weight=1)
 		
@@ -177,7 +176,7 @@ class MainTab:
 			self._lbs_js[j][keys[2]] = Label(parent, text=('%+.2f' % 0.00))
 			self._lbs_js[j][keys[3]] = Label(parent, text=('%+.2f' % 0.00))
 			for (t, key) in enumerate(keys):
-				self._lbs_js[j][key].grid(row=j+1, column=t, sticky=N+S+E+W)
+				self._lbs_js[j][key].grid(row=j+1, column=t, sticky='NSEW')
 	
 	def _make_lb_gs(self, parent):
 		"""
@@ -210,8 +209,8 @@ class MainTab:
 			self._lbs_gs[g] = dict()
 			self._lbs_gs[g]['title'] = Label(parent, text=('Gripper %u' % g))
 			self._lbs_gs[g]['value'] = Label(parent, text=('%.2f' % 0.00))
-			self._lbs_gs[g]['title'].grid(row=0, column=g, sticky=N+S+E+W)
-			self._lbs_gs[g]['value'].grid(row=1, column=g, sticky=N+S+E+W)
+			self._lbs_gs[g]['title'].grid(row=0, column=g, sticky='NSEW')
+			self._lbs_gs[g]['value'].grid(row=1, column=g, sticky='NSEW')
 			Grid.columnconfigure(parent, g, weight=1)
 	
 	def update(self):

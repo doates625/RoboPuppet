@@ -8,8 +8,6 @@ Written by Dan Oates (WPI Class of 2020)
 
 import numpy as np
 from collections import deque
-from math import ceil
-from sys import float_info
 
 """
 Class Definition

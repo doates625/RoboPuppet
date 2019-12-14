@@ -6,7 +6,8 @@ Class for transmitting, receiving, and processing serial data packets
 Written by Dan Oates (WPI Class of 2020)
 """
 
-from struct import pack, unpack
+from struct import pack
+from struct import unpack
 
 """
 Class Definition
@@ -111,3 +112,4 @@ class SerialServer:
             else:
                 self._serial.flushInput()
                 return
+

@@ -2,14 +2,16 @@
 
 """
 serial_comms.py
-Serial communication class between Python and RoboPuppet microcontroller
+Serial communication class between Python and RoboPuppet MCU
 Written by Dan Oates (WPI Class of 2020)
 """
 
-from constants import num_joints, num_grippers
+from constants import num_joints
+from constants import num_grippers
 from serial import Serial
 from serial_server import SerialServer
-from struct import pack, unpack
+from struct import pack
+from struct import unpack
 
 """
 Class Definition

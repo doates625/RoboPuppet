@@ -8,12 +8,16 @@ Written by Dan Oates (WPI Class of 2020)
 
 import rospy
 import baxter_interface as baxter
-from rospy import Publisher, Subscriber
+from rospy import Publisher
+from rospy import Subscriber
+from std_msgs.msg import Empty
+from std_msgs.msg import Bool
+from std_msgs.msg import String
+from std_msgs.msg import Float32
+from robopuppet.srv import GetConfig
 from constants import num_joints
 from constants import num_grippers
 from constants import config_names
-from robopuppet.srv import GetConfig
-from std_msgs.msg import Empty, Bool, String, Float32
 from baxter_interface import CHECK_VERSION
 from serial_comms import SerialComms
 

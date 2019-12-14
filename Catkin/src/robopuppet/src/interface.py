@@ -5,12 +5,17 @@ interface.py
 Class for interfacing with RoboPuppet through ROS messages
 """
 
-import constants
-from constants import num_joints, num_grippers
-from robopuppet.srv import GetConfig
 import rospy
-from rospy import Publisher, Subscriber
-from std_msgs.msg import Empty, Bool, String, Float32
+from rospy import Publisher
+from rospy import Subscriber
+from std_msgs.msg import Empty
+from std_msgs.msg import Bool
+from std_msgs.msg import String
+from std_msgs.msg import Float32
+from robopuppet.srv import GetConfig
+from constants import num_joints
+from constants import num_grippers
+from constants import config_names
 from time import time
 
 """
@@ -42,7 +47,7 @@ class Interface:
 			topics['calibrated'] = Subscriber(tnj + '/calibrated', Bool, self._msg_joint, (self._cals, j))
 			topics['angle'] = Subscriber(tnj + '/angle', Float32, self._msg_joint, (self._angles, j))
 			topics['voltage'] = Subscriber(tnj + '/voltage', Float32, self._msg_joint, (self._voltages, j))
-			for name in constants.config_names:
+			for name in config_names:
 				topics[name] = Publisher(tnj + '/' + name, Float32, queue_size=10)
 			self._topics['joint'][j] = topics
 		self._topics['gripper'] = dict()
