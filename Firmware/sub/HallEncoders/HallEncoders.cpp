@@ -2,7 +2,7 @@
  * @file HallEncoders.cpp
  * @author Dan Oates (WPI Class of 2020)
  */
-#include <HallEncoders.h>
+#include "HallEncoders.h"
 #include <AS5048B.h>
 
 /**

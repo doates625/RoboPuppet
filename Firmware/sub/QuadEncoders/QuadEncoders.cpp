@@ -2,7 +2,7 @@
  * @file QuadEncoders.cpp
  * @author Dan Oates (WPI Class of 2020)
  */
-#include <QuadEncoders.h>
+#include "QuadEncoders.h"
 #include <QuadEncoderX.h>
 
 /**

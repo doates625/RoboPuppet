@@ -2,7 +2,7 @@
  * @file Encoders.cpp
  * @author Dan Oates (WPI Class of 2020)
  */
-#include <Encoders.h>
+#include "Encoders.h"
 #include <RoboPuppet.h>
 #include <QuadEncoders.h>
 #include <HallEncoders.h>

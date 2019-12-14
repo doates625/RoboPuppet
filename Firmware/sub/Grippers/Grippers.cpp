@@ -2,7 +2,7 @@
  * @file Grippers.cpp
  * @author Dan Oates (WPI Class of 2020)
  */
-#include <Grippers.h>
+#include "Grippers.h"
 #include <RoboPuppet.h>
 #include <AnalogIn.h>
 using RoboPuppet::num_grippers;
