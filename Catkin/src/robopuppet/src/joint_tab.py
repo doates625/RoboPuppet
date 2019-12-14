@@ -72,6 +72,7 @@ class JointTab:
 		"""
 		Creates plots frame for angle and voltage
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_plt = Frame(parent)
 		self._fr_plt.pack(side='left', fill='both')
@@ -80,6 +81,7 @@ class JointTab:
 		"""
 		Creates joint angle plot
 		:param parent: Parent frame
+		:return: None
 		"""
 		
 		# Create plot
@@ -109,6 +111,7 @@ class JointTab:
 		"""
 		Creates joint voltage plot
 		:param parent: Parent frame
+		:return: None
 		"""
 		
 		# Create plot
@@ -138,6 +141,7 @@ class JointTab:
 		"""
 		Creates config params frame
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_cfg = Frame(parent)
 		self._fr_cfg.pack(side='left', fill='both')
@@ -146,6 +150,7 @@ class JointTab:
 		"""
 		Creates main config label
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._lb_cfg = Label(parent, text='Settings')
 		self._lb_cfg.grid(row=0, columnspan=2, sticky='NSEW')
@@ -154,6 +159,7 @@ class JointTab:
 		"""
 		Creates config labels and entries
 		:param parent: Parent frame
+		:return: None
 		
 		Dictionary structures:		
 		cfg_lbs[config_name] = Config label
@@ -193,6 +199,7 @@ class JointTab:
 	def _bt_get_cb(self):
 		"""
 		Updates config text fields with current config values
+		:return: None
 		"""
 		configs = self._puppet.get_configs(self._joint)
 		self._cfg_svs['home_angle'].set(config_fmt % configs.home_angle)
@@ -211,6 +218,7 @@ class JointTab:
 	def _bt_set_cb(self):
 		"""
 		Updates robopuppet with configs in all text fields
+		:return: None
 		"""
 		for name in config_names:
 			svar = self._cfg_svs[name]
@@ -224,6 +232,7 @@ class JointTab:
 	def update(self):
 		"""
 		Updates GUI plots if tab is selected
+		:return: None
 		"""
 		angle = self._puppet.get_angle(self._joint)
 		voltage = self._puppet.get_voltage(self._joint)
@@ -233,3 +242,4 @@ class JointTab:
 		if render:
 			self._cv_jp.draw()
 			self._cv_vp.draw()
+

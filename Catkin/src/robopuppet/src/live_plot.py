@@ -40,6 +40,7 @@ class LivePlot:
 		Updates plot with new value
 		:param y: Newest plot value
 		:param render: Flag to render plot [Bool]
+		:return: None
 		"""
 		
 		# Update y-list

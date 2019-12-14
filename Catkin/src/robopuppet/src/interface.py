@@ -73,6 +73,7 @@ class Interface:
 		"""
 		Sets arm opmode
 		:param opmode: 'limp' or 'hold'
+		:return: None
 		"""
 		self._topics['opmode'].publish(String(opmode))
 	
@@ -110,6 +111,7 @@ class Interface:
 		:param joint: Joint index [0...6]
 		:param setting: Setting name [string]
 		:param value: Value to set [float]
+		:return: None
 		
 		Config options:
 		'home_angle' [rad]
@@ -139,6 +141,7 @@ class Interface:
 		"""
 		Updates time since last heartbeat
 		:param msg: Empty message [std_msgs/Empty]
+		:return: None
 		"""
 		self._last_heartbeat_time = time()
 	
@@ -147,6 +150,7 @@ class Interface:
 		Updates joint state variable
 		:param msg: Contains new state
 		:param args: Tuple of storage array and joint index [0...6]
+		:return: None
 		"""
 		array, joint = args
 		array[joint] = msg.data
@@ -156,6 +160,7 @@ class Interface:
 		Updates gripper reading
 		:param msg: Gripper reading [0-1] [std_msgs/Float32]
 		:param args: Tuple of gripper index [0...3]
+		:return: None
 		"""
 		index, = args
 		self._grippers[index] = msg.data

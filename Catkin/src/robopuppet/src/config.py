@@ -67,7 +67,8 @@ class Config:
 	def _srv_config(self, req):
 		"""
 		Config request service handler
-		:param req: GetConfig request
+		:param req: Request [GetConfig]
+		:return: Respone [GetConfigResponse]
 		"""
 		section = 'joint_%u' % req.joint
 		response = GetConfigResponse(
@@ -90,6 +91,7 @@ class Config:
 		Updates config fle with new setting
 		:param msg: Value to set [std_msgs/Float32]
 		:param args: Setting args
+		:return: None
 		
 		Setting args:
 		args[0] = Joint index [0...6]

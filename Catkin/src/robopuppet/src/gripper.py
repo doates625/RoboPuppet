@@ -35,6 +35,7 @@ class Gripper:
 	def update(self):
 		"""
 		Updates gripper
+		:return: None
 		"""
 		if self._puppet.get_gripper(0) > 0.5:
 			self._gripper.close()

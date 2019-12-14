@@ -61,6 +61,7 @@ class MainTab:
 		"""
 		Creates top frame
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_top = Frame(parent, height=50)
 		self._fr_top.pack_propagate(False)
@@ -70,6 +71,7 @@ class MainTab:
 		"""
 		Creates heartbeat frame
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_hb = Frame(parent)
 		self._fr_hb.pack_propagate(False)
@@ -79,6 +81,7 @@ class MainTab:
 		"""
 		Creates heartbeat label
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._lb_hb = Label(parent, text=('Last Heartbeat: %.2f' % 0.0))
 		self._lb_hb.pack(expand=True)
@@ -87,6 +90,7 @@ class MainTab:
 		"""
 		Creates opmode frame
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_om = Frame(parent)
 		self._fr_om.pack_propagate(False)
@@ -96,6 +100,7 @@ class MainTab:
 		"""
 		Creates opmode label
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._lb_om = Label(parent, text='Opmode')
 		self._lb_om.pack(side='top')
@@ -118,6 +123,7 @@ class MainTab:
 	def _opmode_cb(self, *argv):
 		"""
 		Sends opmode command to RoboPuppet when radio button changes
+		:return: None
 		"""
 		opmode = self._sv_om.get()
 		self._puppet.set_opmode(opmode)
@@ -126,6 +132,7 @@ class MainTab:
 		"""
 		Creates joint state label
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._lb_js = Label(parent, text='Joint States')
 		self._lb_js.pack(side='top')
@@ -134,6 +141,7 @@ class MainTab:
 		"""
 		Creates joint state frame
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_js = Frame(parent)
 		self._fr_js.pack_propagate(False)
@@ -143,6 +151,7 @@ class MainTab:
 		"""
 		Creates joint state label nested dictionary
 		:param parent: Parent frame
+		:return: None
 		
 		Dictionary structure:
 		labels['title'][0] = Index title [string]
@@ -182,6 +191,7 @@ class MainTab:
 		"""
 		Creates and returns gripper state label
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._lb_gs = Label(parent, text='Gripper States')
 		self._lb_gs.pack(side='top')
@@ -190,6 +200,7 @@ class MainTab:
 		"""
 		Creates and returns gripper state frame
 		:param parent: Parent frame
+		:return: None
 		"""
 		self._fr_gs = Frame(parent)
 		self._fr_gs.pack_propagate(False)
@@ -199,6 +210,7 @@ class MainTab:
 		"""
 		Creates and returns gripper state label nested dictionary
 		:param parent: Parent frame
+		:return: None
 		
 		Dictionary structure:
 		labels[0...3]['title'] = Title label ['Gripper X']
@@ -216,6 +228,7 @@ class MainTab:
 	def update(self):
 		"""
 		Updates GUI labels if tab is selected
+		:return: None
 		"""
 		if self._parent.tab(self._parent.select(), 'text') == self._tab_name:
 		

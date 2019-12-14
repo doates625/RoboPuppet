@@ -57,6 +57,7 @@ class GUI:
 	def _update(self):
 		"""
 		Updates GUI with RoboPuppet data
+		:return: None
 		"""
 		
 		# Schedule next update or shutdown
