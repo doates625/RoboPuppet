@@ -45,7 +45,8 @@ class GUI:
 		self._tab_joints = []
 		if self._debug_mode:
 			for j in range(num_joints):
-				self._tab_joints.append(JointTab(self._nb, self._puppet, j))
+				self._tab_joints.append(
+					JointTab(self._nb, self._puppet, self._frame_rate, j))
 		
 		# Start Tkinter
 		self._nb.enable_traversal()

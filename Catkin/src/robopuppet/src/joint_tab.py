@@ -18,7 +18,6 @@ from matplotlib.backends.backend_tkagg import NavigationToolbar2TkAgg
 from matplotlib.figure import Figure
 from constants import motor_vcc
 from constants import config_names
-from constants import frame_rate
 from live_plot import LivePlot
 from math import pi
 
@@ -39,17 +38,19 @@ Joint Tab Class
 """
 class JointTab:
 	
-	def __init__(self, parent, puppet, joint):
+	def __init__(self, parent, puppet, frame_rate, joint):
 		"""
 		Creates GUI joint tab
 		:param parent: Tab parent [Notebook]
 		:param puppet: RoboPuppet [Interface]
+		:param frame_rate: Framerate [Hz]
 		:param joint: Joint index [0...6]
 		"""
 		
 		# Save arguments
 		self._parent = parent
 		self._puppet = puppet
+		self._frame_rate = frame_rate
 		self._joint = joint
 		
 		# Create frame
@@ -98,7 +99,7 @@ class JointTab:
 			self._axs_jp,
 			PLOT_COLOR_J,
 			PLOT_DURATION,
-			frame_rate)
+			self._frame_rate)
 		
 		# Create canvas
 		self._cv_jp = FigureCanvasTkAgg(self._fig_jp, master=parent)
@@ -127,7 +128,7 @@ class JointTab:
 			self._axs_vp,
 			PLOT_COLOR_V,
 			PLOT_DURATION,
-			frame_rate)
+			self._frame_rate)
 		
 		# Create canvas
 		self._cv_vp = FigureCanvasTkAgg(self._fig_vp, master=parent)
