@@ -25,9 +25,8 @@ namespace AngleFilters
 	ClampLimiter* angle_limiters[num_joints];
 	SlewLimiter* velocity_limiters[num_joints];
 
-	// Angle data
-	float angles_raw[num_joints];
-	float angles_filt[num_joints];
+	// Filtered angles
+	float angles[num_joints];
 
 	// Init flag
 	bool init_complete = false;
@@ -53,8 +52,7 @@ void AngleFilters::init()
 				default_velocity_min,
 				default_velocity_max,
 				RoboPuppet::f_ctrl);
-			angles_raw[j] = 0.0f;
-			angles_filt[j] = 0.0f;
+			angles[j] = 0.0f;
 		}
 
 		// Set init flag
@@ -70,21 +68,19 @@ void AngleFilters::update()
 	for (uint8_t j = 0; j < num_joints; j++)
 	{
 		float angle = Encoders::get_angle(j);
-		angles_raw[j] = angle;
 		angle = angle_limiters[j]->update(angle);
 		angle = velocity_limiters[j]->update(angle);
-		angles_filt[j] = angle;
+		angles[j] = angle;
 	}
 }
 
 /**
- * @brief Returns joint angle [rad]
+ * @brief Returns filtered joint angle [rad]
  * @param joint Joint index [0...6]
- * @param filtered True for filtered angle, false for raw
  */
-float AngleFilters::get(uint8_t joint, bool filtered)
+float AngleFilters::get_angle(uint8_t joint)
 {
-	return filtered ? angles_filt[joint] : angles_raw[joint];
+	return angles[joint];
 }
 
 /**

@@ -5,6 +5,7 @@
  */
 #include <Arduino.h>
 #include <RoboPuppet.h>
+#include <Encoders.h>
 #include <AngleFilters.h>
 #include <Grippers.h>
 #include <Motors.h>
@@ -31,6 +32,7 @@ void ctrl_update()
 	led = 1;
 
 	// Run angle reading and control
+	Encoders::update();
 	AngleFilters::update();
 	Controllers::update();
 
@@ -46,6 +48,7 @@ void ctrl_update()
 void setup()
 {
 	// Initialize subsystems
+	Encoders::init();
 	AngleFilters::init();
 	Controllers::init();
 	ROSComms::init();

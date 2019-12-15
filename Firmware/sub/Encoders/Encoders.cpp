@@ -15,6 +15,7 @@ namespace Encoders
 {
 	bool init_complete = false;
 	float signs[num_joints];
+	float angles[num_joints];
 	bool is_quad(uint8_t joint);
 }
 
@@ -29,14 +30,28 @@ void Encoders::init()
 		QuadEncoders::init();
 		HallEncoders::init();
 
-		// Set joint signs to default +1
+		// Init joint signs and angles
 		for (uint8_t j = 0; j < num_joints; j++)
 		{
 			signs[j] = +1.0f;
+			angles[j] = 0.0f;
 		}
 
 		// Set init flag
 		init_complete = true;
+	}
+}
+
+/**
+ * @brief Reads and stores each encoder angle
+ */
+void Encoders::update()
+{
+	for (uint8_t j = 0; j < num_joints; j++)
+	{
+		angles[j] = signs[j] * (is_quad(j) ?
+			QuadEncoders::get_angle(j) :
+			HallEncoders::get_angle(j));
 	}
 }
 
@@ -73,14 +88,12 @@ bool Encoders::is_calibrated(uint8_t joint)
 }
 
 /**
- * @brief Returns angle of encoder [rad]
+ * @brief Returns angle of encoder from last update [rad]
  * @param joint Joint index [0...6]
  */
 float Encoders::get_angle(uint8_t joint)
 {
-	return signs[joint] * (is_quad(joint) ?
-		QuadEncoders::get_angle(joint) :
-		HallEncoders::get_angle(joint));
+	return angles[joint];
 }
 
 /**

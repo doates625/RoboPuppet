@@ -9,6 +9,7 @@
 namespace Encoders
 {
 	void init();
+	void update();
 	void set_home(uint8_t joint, float home_angle);
 	void set_sign(uint8_t joint, float sign);
 	bool is_calibrated(uint8_t joint);

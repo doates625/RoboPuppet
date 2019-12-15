@@ -162,7 +162,7 @@ void ROSComms::msg_tx_joint_state(uint8_t* data)
 	Struct str(data, Struct::lsb_first);
 	str << tx_j;
 	str << (uint8_t)(Encoders::is_calibrated(tx_j) ? 0x01 : 0x00);
-	str << AngleFilters::get(tx_j);
+	str << AngleFilters::get_angle(tx_j);
 	str << Controllers::get_voltage(tx_j);
 }
 

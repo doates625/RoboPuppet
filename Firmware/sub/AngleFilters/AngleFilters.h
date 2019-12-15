@@ -11,7 +11,7 @@ namespace AngleFilters
 	// Standard methods
 	void init();
 	void update();
-	float get(uint8_t joint, bool filtered = true);
+	float get_angle(uint8_t joint);
 
 	// Configuration methods
 	void set_angle_min(uint8_t joint, float angle);

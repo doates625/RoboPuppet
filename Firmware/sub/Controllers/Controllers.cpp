@@ -4,7 +4,7 @@
  */
 #include "Controllers.h"
 #include <RoboPuppet.h>
-#include <AngleFilters.h>
+#include <Encoders.h>
 #include <Motors.h>
 #include <PID.h>
 #include <CppUtil.h>
@@ -32,7 +32,7 @@ void Controllers::init()
 	if (!init_complete)
 	{
 		// Init dependent subsystems
-		AngleFilters::init();
+		Encoders::init();
 		Motors::init();
 
 		// Init controllers, setpoints, voltages
@@ -64,7 +64,7 @@ void Controllers::set_enabled(bool enabled)
 		for (uint8_t j = 0; j < num_joints; j++)
 		{
 			controllers[j]->reset();
-			setpoints[j] = AngleFilters::get(j, false);
+			setpoints[j] = Encoders::get_angle(j);
 		}
 	}
 	else
@@ -91,7 +91,7 @@ void Controllers::update()
 		for (uint8_t j = 0; j < num_joints; j++)
 		{
 			// Compute angular error
-			float error = setpoints[j] - AngleFilters::get(j, false);
+			float error = setpoints[j] - Encoders::get_angle(j);
 			error = wrap(error, -M_PI, +M_PI);
 
 			// Set voltage command
