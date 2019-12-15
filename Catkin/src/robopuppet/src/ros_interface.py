@@ -1,8 +1,8 @@
 #!/usr/bin/env python
 
 """
-interface.py
-Class for interfacing with RoboPuppet through ROS messages
+ros_interface.py
+ROS message and service interface for RoboPuppet
 """
 
 import rospy
@@ -21,7 +21,7 @@ from time import time
 """
 Class Definition
 """
-class Interface:
+class ROSInterface:
 
 	def __init__(self, side):
 		"""

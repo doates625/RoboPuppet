@@ -8,7 +8,7 @@ Written by Dan Oates (WPI Class of 2020)
 
 import rospy
 from constants import num_joints
-from interface import Interface
+from ros_interface import ROSInterface
 from Tkinter import Tk
 from Tkinter import Frame
 from ttk import Notebook
@@ -34,7 +34,7 @@ class GUI:
 		self._arm_side = rospy.get_param('~arm_side')
 		self._debug_mode = rospy.get_param('~debug_mode')
 		self._frame_rate = rospy.get_param('~frame_rate')
-		self._puppet = Interface(self._arm_side)
+		self._puppet = ROSInterface(self._arm_side)
 		
 		# Tkinter Root
 		self._root = Tk()

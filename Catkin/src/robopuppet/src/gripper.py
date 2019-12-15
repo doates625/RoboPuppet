@@ -8,7 +8,7 @@ Written by Dan Oates (WPI Class of 2020)
 
 import rospy
 import baxter_interface as baxter
-from interface import Interface
+from ros_interface import ROSInterface
 from baxter_interface import CHECK_VERSION
 
 """
@@ -26,7 +26,7 @@ class Gripper:
 		# Init ROS node
 		rospy.init_node('gripper')
 		arm_side = rospy.get_param('~arm_side')
-		self._puppet = Interface(arm_side)
+		self._puppet = ROSInterface(arm_side)
 		
 		# Init baxter gripper controller
 		baxter.RobotEnable(CHECK_VERSION).enable()
