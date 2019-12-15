@@ -19,7 +19,7 @@ from constants import num_joints
 from constants import num_grippers
 from constants import config_names
 from baxter_interface import CHECK_VERSION
-from serial_comms import SerialComms
+from serial_interface import SerialInterface
 
 """
 Class Definition
@@ -55,7 +55,7 @@ class Controller:
 			self._joint_angles[self._joint_names[j]] = 0.0
 		
 		# Serial interface
-		self._puppet = SerialComms(port_name, baud_rate)
+		self._puppet = SerialInterface(port_name, baud_rate)
 		
 		# ROS topics
 		self._topics = dict()

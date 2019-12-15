@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-serial_comms.py
+serial_interface.py
 Serial communication class between Python and RoboPuppet MCU
 Written by Dan Oates (WPI Class of 2020)
 """
@@ -16,7 +16,7 @@ from struct import unpack
 """
 Class Definition
 """
-class SerialComms:
+class SerialInterface:
 	
 	"""
 	Server Settings
