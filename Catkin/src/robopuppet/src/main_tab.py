@@ -123,6 +123,7 @@ class MainTab:
 	def _opmode_cb(self, *argv):
 		"""
 		Sends opmode command to RoboPuppet when radio button changes
+		:param argv: Unused callback requirement
 		:return: None
 		"""
 		opmode = self._sv_om.get()

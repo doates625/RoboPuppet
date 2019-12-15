@@ -140,7 +140,7 @@ class Interface:
 	def _msg_heartbeat(self, msg):
 		"""
 		Updates time since last heartbeat
-		:param msg: Empty message [std_msgs/Empty]
+		:param msg: Empty message [Empty]
 		:return: None
 		"""
 		self._last_heartbeat_time = time()
@@ -158,7 +158,7 @@ class Interface:
 	def _msg_gripper(self, msg, args):
 		"""
 		Updates gripper reading
-		:param msg: Gripper reading [0-1] [std_msgs/Float32]
+		:param msg: Gripper reading [0-1] [Float32]
 		:param args: Tuple of gripper index [0...3]
 		:return: None
 		"""

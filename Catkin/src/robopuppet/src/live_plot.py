@@ -38,7 +38,7 @@ class LivePlot:
 	def update(self, y, render=True):
 		"""
 		Updates plot with new value
-		:param y: Newest plot value
+		:param y: Newest plot value [float]
 		:param render: Flag to render plot [Bool]
 		:return: None
 		"""
