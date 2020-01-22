@@ -11,7 +11,6 @@ import baxter_interface as baxter
 from rospy import Publisher
 from rospy import Subscriber
 from std_msgs.msg import Empty
-from std_msgs.msg import Bool
 from std_msgs.msg import String
 from std_msgs.msg import Float32
 from robopuppet.srv import GetConfig
@@ -66,7 +65,7 @@ class Controller:
 		for j in range(num_joints):
 			tnj = tn + '/joint_' + str(j)
 			topics = dict()
-			topics['calibrated'] = Publisher(tnj + '/calibrated', Bool, queue_size=10)
+			topics['enc_stat'] = Publisher(tnj + '/enc_stat', String, queue_size=10)
 			topics['angle'] = Publisher(tnj + '/angle', Float32, queue_size=10)
 			topics['voltage'] = Publisher(tnj + '/voltage', Float32, queue_size=10)
 			for name in config_names:
@@ -117,7 +116,7 @@ class Controller:
 		# Publish ROS state topics
 		for j in range(num_joints):
 			topics = self._topics['joint'][j]
-			topics['calibrated'].publish(Bool(self._puppet.is_calibrated(j)))
+			topics['enc_stat'].publish(String(self._puppet.get_enc_stat(j)))
 			topics['angle'].publish(Float32(self._puppet.get_angle(j)))
 			topics['voltage'].publish(Float32(self._puppet.get_voltage(j)))
 		for g in range(num_grippers):

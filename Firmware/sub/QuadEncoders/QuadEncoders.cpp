@@ -4,6 +4,7 @@
  */
 #include "QuadEncoders.h"
 #include <QuadEncoderX.h>
+using RoboPuppet::enc_stat_t;
 
 /**
  * Private subsystem info
@@ -95,16 +96,23 @@ void QuadEncoders::set_home(uint8_t joint, float home_angle)
 }
 
 /**
- * @brief Returns calibration status of encoder
+ * @brief Gets encoder status
  * @param joint Joint index [0, 2, 4, 6]
  */
-bool QuadEncoders::is_calibrated(uint8_t joint)
+enc_stat_t QuadEncoders::get_status(uint8_t joint)
 {
 #if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
-	return encoders[index]->is_calibrated();
+	if (encoders[index]->is_calibrated())
+	{
+		return RoboPuppet::enc_working;
+	}
+	else
+	{
+		return RoboPuppet::enc_uncalibrated;
+	}
 #else
-	return true;
+	return RoboPuppet::enc_working;
 #endif
 }
 

@@ -30,7 +30,7 @@ class ROSInterface:
 		"""
 		
 		# State data
-		self._cals = [False] * num_joints
+		self._enc_stats = ['Unknown'] * num_joints
 		self._angles = [0.0] * num_joints
 		self._voltages = [0.0] * num_joints
 		self._grippers = [0.0] * num_grippers
@@ -44,7 +44,7 @@ class ROSInterface:
 		for j in range(num_joints):
 			tnj = tn + '/joint_' + str(j)
 			topics = dict()
-			topics['calibrated'] = Subscriber(tnj + '/calibrated', Bool, self._msg_joint, (self._cals, j))
+			topics['enc_stat'] = Subscriber(tnj + '/enc_stat', String, self._msg_joint, (self._enc_stats, j))
 			topics['angle'] = Subscriber(tnj + '/angle', Float32, self._msg_joint, (self._angles, j))
 			topics['voltage'] = Subscriber(tnj + '/voltage', Float32, self._msg_joint, (self._voltages, j))
 			for name in config_names:
@@ -77,12 +77,12 @@ class ROSInterface:
 		"""
 		self._topics['opmode'].publish(String(opmode))
 	
-	def is_calibrated(self, joint):
+	def get_enc_stat(self, joint):
 		"""
-		Returns joint calibration status
+		Returns encoder status
 		:param joint: Joint index [0...6]
 		"""
-		return self._cals[joint]
+		return self._enc_stats[joint]
 	
 	def get_angle(self, joint):
 		"""

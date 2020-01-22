@@ -156,11 +156,11 @@ class MainTab:
 		
 		Dictionary structure:
 		labels['title'][0] = Index title [string]
-		labels['title'][1] = Calibration title [string]
+		labels['title'][1] = Encoder status title [string]
 		labels['title'][2] = Angle title [string]
 		labels['title'][3] = Voltage title [string]
 		labels[0...6]['index'] = Joint index ['0'...'6']
-		labels[0...6]['cal'] = Calibration status ['True', 'False']
+		labels[0...6]['enc_stat'] = Encoders status [string]
 		labels[0...6]['angle'] = Angle ['%+.2f', rad]
 		labels[0...6]['voltage'] = Voltage ['%+.2f', V]
 		"""
@@ -169,7 +169,7 @@ class MainTab:
 		self._lbs_js = dict()
 		
 		# Column Titles
-		titles = ['Joint Index', 'Calibration', 'Angle [rad]', 'Voltage [V]']
+		titles = ['Joint Index', 'Encoder', 'Angle [rad]', 'Voltage [V]']
 		self._lbs_js['title'] = dict()
 		for (t, title) in enumerate(titles):
 			label = Label(parent, text=titles[t])
@@ -178,11 +178,11 @@ class MainTab:
 			Grid.columnconfigure(parent, t, weight=1)
 		
 		# Joint States
-		keys = ['index', 'cal', 'angle', 'voltage']
+		keys = ['index', 'enc_stat', 'angle', 'voltage']
 		for j in range(num_joints):
 			self._lbs_js[j] = dict()
 			self._lbs_js[j][keys[0]] = Label(parent, text=('%u' % j))
-			self._lbs_js[j][keys[1]] = Label(parent, text='False')
+			self._lbs_js[j][keys[1]] = Label(parent, text='Unknown')
 			self._lbs_js[j][keys[2]] = Label(parent, text=('%+.2f' % 0.00))
 			self._lbs_js[j][keys[3]] = Label(parent, text=('%+.2f' % 0.00))
 			for (t, key) in enumerate(keys):
@@ -239,10 +239,10 @@ class MainTab:
 		
 			# Update joint angles
 			for j in range(num_joints):
-				cal = 'True' if self._puppet.is_calibrated(j) else 'False'
+				enc_stat = self._puppet.get_enc_stat(j)
 				angle = self._puppet.get_angle(j)
 				voltage = self._puppet.get_voltage(j)
-				self._lbs_js[j]['cal'].config(text=cal)
+				self._lbs_js[j]['enc_stat'].config(text=enc_stat)
 				self._lbs_js[j]['angle'].config(text=('%+.2f' % angle))
 				self._lbs_js[j]['voltage'].config(text=('%+.2f' % voltage))
 		

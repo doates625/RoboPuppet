@@ -6,6 +6,7 @@
 #include <RoboPuppet.h>
 #include <QuadEncoders.h>
 #include <HallEncoders.h>
+using RoboPuppet::enc_stat_t;
 using RoboPuppet::num_joints;
 
 /**
@@ -79,12 +80,14 @@ void Encoders::set_sign(uint8_t joint, float sign)
 }
 
 /**
- * @brief Returns calibration status of encoder
+ * @brief Gets encoder status
  * @param joint Joint index [0...6]
  */
-bool Encoders::is_calibrated(uint8_t joint)
+enc_stat_t Encoders::get_status(uint8_t joint)
 {
-	return is_quad(joint) ? QuadEncoders::is_calibrated(joint) : true;
+	return is_quad(joint) ?
+		QuadEncoders::get_status(joint) :
+		HallEncoders::get_status(joint);
 }
 
 /**

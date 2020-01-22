@@ -45,6 +45,11 @@ class SerialInterface:
 		'limp': 0x00,
 		'hold': 0x01,
 	}
+	_enc_stat_dict = {
+		0x00 : 'Working',
+		0x01 : 'Disconnected',
+		0x02 : 'Uncalibrated',
+	}
 
 	def __init__(self, port, baud):
 		"""
@@ -55,7 +60,7 @@ class SerialInterface:
 		
 		# State Data
 		self._got_heartbeat = False
-		self._cals = [0.0] * num_joints
+		self._enc_stats = ['Unknown'] * num_joints
 		self._angles = [0.0] * num_joints
 		self._voltages = [0.0] * num_joints
 		self._grippers = [0.0] * num_grippers
@@ -98,12 +103,12 @@ class SerialInterface:
 		self._tx_opmode = opmode
 		self._server.tx(self._msg_id_opmode)
 	
-	def is_calibrated(self, joint):
+	def get_enc_stat(self, joint):
 		"""
-		Returns joint calibration status
+		Returns encoder status
 		:param joint: Joint index [0...6]
 		"""
-		return self._cals[joint]
+		return self._enc_stats[joint]
 	
 	def get_angle(self, joint):
 		"""
@@ -184,14 +189,15 @@ class SerialInterface:
 		
 		Data format:
 		[0-0]: Joint number (0-6)
-		[1-1]: Calibration status (enum)
-			   0x00 = Not calibrated
-			   0x01 = Calibrated
+		[1-1]: Encoder status (enum)
+			   0x00 = Working
+			   0x01 = Disconnected
+			   0x02 = Uncalibrated
 		[2-5]: Joint angle (float32) [rad]
 		[6-9]: Motor voltage (float32) [V]
 		"""
 		joint = data[0]
-		self._cals[joint] = (data[1] == 0x01)
+		self._enc_stats[joint] = self._enc_stat_dict[data[1]]
 		self._angles[joint] = unpack('f', bytearray(data[2:6]))[0]
 		self._voltages[joint] = unpack('f', bytearray(data[6:10]))[0]
 	

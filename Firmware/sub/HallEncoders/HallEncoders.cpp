@@ -4,6 +4,7 @@
  */
 #include "HallEncoders.h"
 #include <AS5048B.h>
+using RoboPuppet::enc_stat_t;
 
 /**
  * Private subsystem info
@@ -67,6 +68,21 @@ void HallEncoders::set_home(uint8_t joint, float home_angle)
 #if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	encoders[index]->set_home(home_angle);
+#endif
+}
+
+/**
+ * @brief Gets encoder status
+ * @param joint Joint index [1, 3, 5]
+ */
+enc_stat_t HallEncoders::get_status(uint8_t joint)
+{
+#if !defined(STUB_ENCODERS)
+	uint8_t index = joint_to_index(joint);
+	// TODO encoders[index]->... check I2C connection, maybe in init?
+	return RoboPuppet::enc_disconnected;
+#else
+	return RoboPuppet::enc_working;
 #endif
 }
 
