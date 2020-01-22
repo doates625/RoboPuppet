@@ -61,18 +61,20 @@ void QuadEncoders::init()
 		}
 
 		// Initialize ISRs
-		attachInterrupt(digitalPinToInterrupt(pins_A[0]), ISR_0_A, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_B[0]), ISR_0_B, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_X[0]), ISR_0_X, RISING);
-		attachInterrupt(digitalPinToInterrupt(pins_A[1]), ISR_2_A, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_B[1]), ISR_2_B, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_X[1]), ISR_2_X, RISING);
-		attachInterrupt(digitalPinToInterrupt(pins_A[2]), ISR_4_A, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_B[2]), ISR_4_B, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_X[2]), ISR_4_X, RISING);
-		attachInterrupt(digitalPinToInterrupt(pins_A[3]), ISR_6_A, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_B[3]), ISR_6_B, CHANGE);
-		attachInterrupt(digitalPinToInterrupt(pins_X[3]), ISR_6_X, RISING);
+		#if !defined(STUB_ENCODERS)
+			attachInterrupt(digitalPinToInterrupt(pins_A[0]), ISR_0_A, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_B[0]), ISR_0_B, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_X[0]), ISR_0_X, RISING);
+			attachInterrupt(digitalPinToInterrupt(pins_A[1]), ISR_2_A, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_B[1]), ISR_2_B, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_X[1]), ISR_2_X, RISING);
+			attachInterrupt(digitalPinToInterrupt(pins_A[2]), ISR_4_A, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_B[2]), ISR_4_B, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_X[2]), ISR_4_X, RISING);
+			attachInterrupt(digitalPinToInterrupt(pins_A[3]), ISR_6_A, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_B[3]), ISR_6_B, CHANGE);
+			attachInterrupt(digitalPinToInterrupt(pins_X[3]), ISR_6_X, RISING);
+		#endif
 		
 		// Set init flag
 		init_complete = true;
@@ -86,8 +88,10 @@ void QuadEncoders::init()
  */
 void QuadEncoders::set_home(uint8_t joint, float home_angle)
 {
+#if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	encoders[index]->set_home(home_angle);
+#endif
 }
 
 /**
@@ -96,8 +100,12 @@ void QuadEncoders::set_home(uint8_t joint, float home_angle)
  */
 bool QuadEncoders::is_calibrated(uint8_t joint)
 {
+#if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	return encoders[index]->is_calibrated();
+#else
+	return true;
+#endif
 }
 
 /**
@@ -106,8 +114,12 @@ bool QuadEncoders::is_calibrated(uint8_t joint)
  */
 float QuadEncoders::get_angle(uint8_t joint)
 {
+#if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	return encoders[index]->get_angle();
+#else
+	return 0.0f;
+#endif
 }
 
 /**

@@ -64,8 +64,10 @@ void HallEncoders::init()
  */
 void HallEncoders::set_home(uint8_t joint, float home_angle)
 {
+#if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	encoders[index]->set_home(home_angle);
+#endif
 }
 
 /**
@@ -73,9 +75,13 @@ void HallEncoders::set_home(uint8_t joint, float home_angle)
  * @param joint Joint index [1, 3, 5]
  */
 float HallEncoders::get_angle(uint8_t joint)
-{
+{	
+#if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
 	return encoders[index]->get_angle();
+#else
+	return 0.0f;
+#endif
 }
 
 /**
