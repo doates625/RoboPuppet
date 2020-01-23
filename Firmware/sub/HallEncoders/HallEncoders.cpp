@@ -25,6 +25,12 @@ namespace HallEncoders
 		0x49,	// Joint 3
 		0x4A,	// Joint 5
 	};
+	enc_stat_t enc_stats[num_encs] =
+	{
+		RoboPuppet::enc_disconnected,
+		RoboPuppet::enc_disconnected,
+		RoboPuppet::enc_disconnected,
+	};
 	AS5048B* encoders[num_encs];
 
 	// Init flag
@@ -51,6 +57,9 @@ void HallEncoders::init()
 		for (uint8_t i = 0; i < num_encs; i++)
 		{
 			encoders[i] = new AS5048B(wire, enc_addrs[i]);
+			enc_stats[i] = (encoders[i]->init()) ?
+				RoboPuppet::enc_working :
+				RoboPuppet::enc_disconnected;
 		}
 
 		// Set init flag
@@ -79,8 +88,7 @@ enc_stat_t HallEncoders::get_status(uint8_t joint)
 {
 #if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
-	// TODO encoders[index]->... check I2C connection, maybe in init?
-	return RoboPuppet::enc_disconnected;
+	return enc_stats[index];
 #else
 	return RoboPuppet::enc_working;
 #endif
@@ -94,7 +102,8 @@ float HallEncoders::get_angle(uint8_t joint)
 {	
 #if !defined(STUB_ENCODERS)
 	uint8_t index = joint_to_index(joint);
-	return encoders[index]->get_angle();
+	bool working = (enc_stats[index] == RoboPuppet::enc_working);
+	return working ? encoders[index]->get_angle() : 0.0f;
 #else
 	return 0.0f;
 #endif
