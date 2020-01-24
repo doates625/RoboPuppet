@@ -21,8 +21,8 @@ namespace Motors
 	
 	// Pin definitions
 	const uint8_t pin_en = 2;
-	const uint8_t pins_fwd[num_joints] = { 3, 5, 7,  9, 29, 35, 37 };
-	const uint8_t pins_rev[num_joints] = { 4, 6, 8, 10, 30, 36, 38 };
+	const uint8_t pins_fwd[num_joints] = { 3, 5, 7,  9, 38, 37, 36 };
+	const uint8_t pins_rev[num_joints] = { 4, 6, 8, 10, 29, 30, 35 };
 
 	// Digital outputs
 	DigitalOut enable_output(pin_en);

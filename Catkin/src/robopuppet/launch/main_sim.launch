@@ -6,8 +6,8 @@
 	<arg name="comm_rate" default="10.0" doc="Communication rate [Hz]"/>
 	<arg name="frame_rate" default="8.0" doc="GUI framerate [Hz]"/>
 	<arg name="debug_mode" default="true" doc="Debug mode flag [Bool]"/>
-	<arg name="run_side_L" default="true" doc="Flag to run L-side [Bool]"/>
-	<arg name="run_side_R" default="false" doc="Flag to run R-side [Bool]"/>
+	<arg name="run_side_L" default="false" doc="Flag to run L-side [Bool]"/>
+	<arg name="run_side_R" default="true" doc="Flag to run R-side [Bool]"/>
 
 	<!-- Baxter Simulator Launch File -->
 	<include file="$(find baxter_gazebo)/launch/baxter_world.launch"/>
