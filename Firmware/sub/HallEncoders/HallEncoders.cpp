@@ -21,8 +21,8 @@ namespace HallEncoders
 	const uint8_t num_encs = 3;
 	const uint8_t enc_addrs[num_encs] =
 	{
-		0x40,	// Joint 1
-		0x44,	// Joint 3
+		0x44,	// Joint 1
+		0x40,	// Joint 3
 		0x48,	// Joint 5
 	};
 	enc_stat_t enc_stats[num_encs] =
