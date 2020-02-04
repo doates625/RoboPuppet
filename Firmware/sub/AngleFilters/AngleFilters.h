@@ -11,9 +11,13 @@ namespace AngleFilters
 	// Standard methods
 	void init();
 	void update();
-	float get_angle(uint8_t joint);
 
-	// Configuration methods
+	// Getters
+	float get_angle(uint8_t joint);
+	float get_angle_min(uint8_t joint);
+	float get_angle_max(uint8_t joint);
+
+	// Setters
 	void set_angle_min(uint8_t joint, float angle);
 	void set_angle_max(uint8_t joint, float angle);
 	void set_velocity_min(uint8_t joint, float velocity);

@@ -84,6 +84,24 @@ float AngleFilters::get_angle(uint8_t joint)
 }
 
 /**
+ * @brief Returns min joint angle [rad]
+ * @param joint Joint index [0...6]
+ */
+float AngleFilters::get_angle_min(uint8_t joint)
+{
+	return angle_limiters[joint]->get_min();
+}
+
+/**
+ * @brief Returns max joint angle [rad]
+ * @param joint Joint index [0...6]
+ */
+float AngleFilters::get_angle_max(uint8_t joint)
+{
+	return angle_limiters[joint]->get_max();
+}
+
+/**
  * @brief Sets minimum joint angle
  * @param joint Joint index [0...6]
  * @param angle Min angle [rad]

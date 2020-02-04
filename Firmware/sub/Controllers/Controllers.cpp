@@ -5,11 +5,13 @@
 #include "Controllers.h"
 #include <RoboPuppet.h>
 #include <Encoders.h>
+#include <AngleFilters.h>
 #include <Motors.h>
 #include <PID.h>
 #include <CppUtil.h>
 using RoboPuppet::num_joints;
 using RoboPuppet::f_ctrl;
+using CppUtil::clamp;
 using CppUtil::wrap;
 
 /**
@@ -102,21 +104,23 @@ void Controllers::update()
 }
 
 /**
- * @brief Gets joint setpoint
- * @param joint Joint index [0...6]
- */
-float Controllers::get_setpoint(uint8_t joint)
-{
-	return voltages[joint];
-}
-
-/**
  * @brief Gets joint voltage command
  * @param joint Joint index [0...6]
  */
 float Controllers::get_voltage(uint8_t joint)
 {
 	return voltages[joint];
+}
+
+/**
+ * @brief Sets joint setpoint
+ * @param joint Joint index [0...6]
+ */
+void Controllers::set_setpoint(uint8_t joint, float angle)
+{
+	float angle_min = AngleFilters::get_angle_min(joint);
+	float angle_max = AngleFilters::get_angle_max(joint);
+	setpoints[joint] = clamp(angle, angle_min, angle_max);
 }
 
 /**

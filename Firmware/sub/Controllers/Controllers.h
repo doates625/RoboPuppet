@@ -12,10 +12,10 @@ namespace Controllers
 	void init();
 	void set_enabled(bool enabled);
 	void update();
-	float get_setpoint(uint8_t joint);
 	float get_voltage(uint8_t joint);
 
 	// Config methods
+	void set_setpoint(uint8_t joint, float angle);
 	void set_voltage_min(uint8_t joint, float voltage);
 	void set_voltage_max(uint8_t joint, float voltage);
 	void set_pid_kp(uint8_t joint, float kp);
