@@ -2,7 +2,7 @@
 
 """
 serial_interface.py
-Serial communication class between Python and RoboPuppet MCU
+Serial communication node between ROS and RoboPuppet MCU
 Written by Dan Oates (WPI Class of 2020)
 """
 
@@ -51,12 +51,18 @@ class SerialInterface:
 		0x02 : 'Uncalibrated',
 	}
 
-	def __init__(self, port, baud):
+	def __init__(self):
 		"""
 		Constructs RoboPuppet serial interface
-		:param port: Serial port name [string]
-		:param baud: Baud rate [int]
 		"""
+		
+		# Init ROS node
+		rospy.init_node('controller')
+		
+		# Get params from server
+		arm_side = rospy.get_param('~arm_side')
+		port_name = rospy.get_param('~port_name')
+		baud_rate = rospy.get_param('~baud_rate')
 		
 		# State Data
 		self._got_heartbeat = False
@@ -66,7 +72,7 @@ class SerialInterface:
 		self._grippers = [0.0] * num_grippers
 		
 		# Serial Server
-		self._serial = Serial(port=port, baudrate=baud, timeout=1.0)
+		self._serial = Serial(port=port_name, baudrate=baud_rate, timeout=1.0)
 		self._server = SerialServer(self._serial, start_byte=self._start_byte)
 		self._server.add_rx(self._msg_id_heartbeat, 0, self._msg_rx_heartbeat)
 		self._server.add_tx(self._msg_id_opmode, 1, self._msg_tx_opmode)
@@ -79,65 +85,93 @@ class SerialInterface:
 		self._tx_joint = None
 		self._tx_setting = None
 		self._tx_value = None
+		
+		# ROS topics
+		self._topics = dict()
+		tn = '/puppet/arm_' + arm_side
+		self._topics['heartbeat'] = Publisher(tn + '/heartbeat', Empty, queue_size=10)
+		self._topics['opmode'] = Subscriber(tn + '/opmode', String, self._msg_ros_opmode)
+		self._topics['joint'] = dict()
+		for j in range(num_joints):
+			tnj = tn + '/joint_' + str(j)
+			topics = dict()
+			topics['enc_stat'] = Publisher(tnj + '/enc_stat', String, queue_size=10)
+			topics['angle'] = Publisher(tnj + '/angle', Float32, queue_size=10)
+			topics['voltage'] = Publisher(tnj + '/voltage', Float32, queue_size=10)
+			for name in config_names:
+				topics[name] = Subscriber(tnj + '/' + name, Float32, self._msg_ros_config, (j, name))
+			self._topics['joint'][j] = topics
+		self._topics['gripper'] = dict()
+		for g in range(num_grippers):
+			tng = tn + '/gripper_' + str(g)
+			self._topics['gripper'][g] = Publisher(tng, Float32, queue_size=10)
+		
+		# Load settings from config
+		name = 'get_config_' + arm_side
+		rospy.wait_for_service(name)
+		proxy = rospy.ServiceProxy(name, GetConfig)
+		for j in range(num_joints):
+			resp = proxy(j)
+			self._set_config(j, 'home_angle', resp.home_angle)
+			self._set_config(j, 'angle_min', resp.angle_min)
+			self._set_config(j, 'angle_max', resp.angle_max)
+			self._set_config(j, 'velocity_min', resp.velocity_min)
+			self._set_config(j, 'velocity_max', resp.velocity_max)
+			self._set_config(j, 'voltage_min', resp.voltage_min)
+			self._set_config(j, 'voltage_max', resp.voltage_max)
+			self._set_config(j, 'pid_kp', resp.pid_kp)
+			self._set_config(j, 'pid_ki', resp.pid_ki)
+			self._set_config(j, 'pid_kd', resp.pid_kd)
+			self._set_config(j, 'sign_angle', resp.sign_angle)
+			self._set_config(j, 'sign_motor', resp.sign_motor)
+		
+		# Disable gravity comp
+		self._set_opmode('limp')
 	
 	def update(self):
 		"""
 		Processes all RX messages
 		:return: True if new heartbeat was received since last update
 		"""
-		self._server.rx()
-		got_heartbeat = self._got_heartbeat
-		self._got_heartbeat = False
-		return got_heartbeat
-	
-	def set_opmode(self, opmode):
-		"""
-		Sets puppet operating mode
-		:param opmode: Opmode [String]
-		:return: None
 		
-		Opmode options:
-		'limp': No motor actuation
-		'hold': Gravity compensation
+		# Process messages
+		self._server.rx()
+		
+		# Pub heartbeat
+		if self._got_heartbeat:
+			self._topics['heartbeat'].publish(Empty())
+			self._got_heartbeat = False
+		
+		# Pub joint states
+		for j in range(num_joints):
+			topics = self._topics['joint'][j]
+			topics['enc_stat'].publish(String(self._enc_stats[j]))
+			topics['angle'].publish(Float32(self._angles[j]))
+			topics['voltage'].publish(Float32(self._voltages[j]))
+		
+		# Pub grippers
+		for g in range(num_grippers):
+			self._topics['gripper'][g].publish(Float32(self._grippers[g]))
+	
+	def _msg_ros_opmode(self, msg):
 		"""
-		self._tx_opmode = opmode
+		Sets puppet opmode from message
+		:param msg: Opmode [std_msgs/String]
+		:return: None
+		"""
+		self._tx_opmode = msg.data
 		self._server.tx(self._msg_id_opmode)
 	
-	def get_enc_stat(self, joint):
+	def _msg_ros_config(self, msg, args):
 		"""
-		Returns encoder status
-		:param joint: Joint index [0...6]
-		"""
-		return self._enc_stats[joint]
-	
-	def get_angle(self, joint):
-		"""
-		Returns joint angle [rad]
-		:param joint: Joint index [0...6]
-		"""
-		return self._angles[joint]
-	
-	def get_voltage(self, joint):
-		"""
-		Returns joint voltage [V]
-		:param joint: Joint index [0...6]
-		"""
-		return self._voltages[joint]
-	
-	def get_gripper(self, index):
-		"""
-		Returns gripper reading [0-1]
-		:param index: Gripper index [0...3]
-		"""
-		return self._grippers[index]
-	
-	def set_config(self, joint, setting, value):
-		"""
-		Configures joint setting
-		:param joint: Joint index [0...6]
-		:param setting: Config option [string]
-		:param value: Value to set [float]
+		Sets puppet config value from message
+		:param msg: Value [std_msgs/Float32]
+		:param args: Setting args
 		:return: None
+		
+		Setting args:
+		args[0] = Joint index [0...6]
+		args[1] = Config name [string]
 		
 		Config options:
 		'home_angle' [rad]
@@ -153,10 +187,12 @@ class SerialInterface:
 		'sign_angle' [+1, -1]
 		'sign_motor' [+1, -1]
 		"""
+		joint, setting = args
 		self._tx_joint = joint
 		self._tx_setting = setting
-		self._tx_value = value		
+		self._tx_value = msg.data
 		self._server.tx(self._msg_id_joint_config)
+		
 	
 	def _msg_rx_heartbeat(self, data):
 		"""
@@ -241,4 +277,15 @@ class SerialInterface:
 		index = data[0]
 		reading = unpack('f', bytearray(data[1:5]))[0]
 		self._grippers[index] = reading
+
+"""
+Main Function
+"""
+if __name__ == '__main__':
+	node = SerialInterface()
+	comm_rate = rospy.get_param('~comm_rate')
+	rate = rospy.Rate(comm_rate)
+	while not rospy.is_shutdown():
+		node.update()
+		rate.sleep()
 
