@@ -8,15 +8,7 @@ Written by Dan Oates (WPI Class of 2020)
 
 import rospy
 import baxter_interface as baxter
-from rospy import Publisher
-from rospy import Subscriber
-from std_msgs.msg import Empty
-from std_msgs.msg import String
-from std_msgs.msg import Float32
-from robopuppet.srv import GetConfig
 from constants import num_joints
-from constants import num_grippers
-from constants import config_names
 from baxter_interface import CHECK_VERSION
 from ros_interface import ROSInterface
 
@@ -29,7 +21,7 @@ class Arm:
 		"""
 		Constructs arm controller node
 		- Enables Baxter
-		- Creates Baxter arm controller
+		- Creates Baxter arm interface
 		- Creates RoboPuppet ROS interface
 		"""
 		
@@ -40,7 +32,7 @@ class Arm:
 		# Enable Baxter
 		enabler = baxter.RobotEnable(CHECK_VERSION).enable()
 		
-		# Baxter arm
+		# Baxter arm interface
 		limb_name = ('left' if arm_side == 'L' else 'right')
 		self._arm = baxter.Limb(limb_name)
 		self._joint_names = self._arm.joint_names()
@@ -48,7 +40,7 @@ class Arm:
 		for j in range(num_joints):
 			self._joint_angles[self._joint_names[j]] = 0.0
 		
-		# ROS interface
+		# RoboPuppet ROS interface
 		self._puppet = ROSInterface(arm_side)
 	
 	def update(self):

@@ -6,8 +6,16 @@ Serial communication node between ROS and RoboPuppet MCU
 Written by Dan Oates (WPI Class of 2020)
 """
 
+import rospy
+from rospy import Publisher
+from rospy import Subscriber
+from std_msgs.msg import Empty
+from std_msgs.msg import String
+from std_msgs.msg import Float32
+from robopuppet.srv import GetConfig
 from constants import num_joints
 from constants import num_grippers
+from constants import config_names
 from serial import Serial
 from serial_server import SerialServer
 from struct import pack
@@ -153,26 +161,25 @@ class SerialInterface:
 		for g in range(num_grippers):
 			self._topics['gripper'][g].publish(Float32(self._grippers[g]))
 	
-	def _msg_ros_opmode(self, msg):
+	def _set_opmode(self, opmode):
 		"""
-		Sets puppet opmode from message
-		:param msg: Opmode [std_msgs/String]
-		:return: None
+		Sets puppet operating mode
+		:param opmode: Opmode [string]
+		
+		Opmode options:
+		'limp' - Motors disabled
+		'hold' - Gravity compensation
 		"""
-		self._tx_opmode = msg.data
+		self._tx_opmode = opmode
 		self._server.tx(self._msg_id_opmode)
 	
-	def _msg_ros_config(self, msg, args):
+	def _set_config(self, joint, setting, value):
 		"""
-		Sets puppet config value from message
-		:param msg: Value [std_msgs/Float32]
-		:param args: Setting args
-		:return: None
-		
-		Setting args:
-		args[0] = Joint index [0...6]
-		args[1] = Config name [string]
-		
+		Sets puppet config value
+		:param joint: Joint index [0...6]
+		:param setting: Config name [string]
+		:param value: Value to set [float]
+			
 		Config options:
 		'home_angle' [rad]
 		'angle_min' [rad]
@@ -187,12 +194,32 @@ class SerialInterface:
 		'sign_angle' [+1, -1]
 		'sign_motor' [+1, -1]
 		"""
-		joint, setting = args
 		self._tx_joint = joint
 		self._tx_setting = setting
-		self._tx_value = msg.data
+		self._tx_value = value
 		self._server.tx(self._msg_id_joint_config)
+	
+	def _msg_ros_opmode(self, msg):
+		"""
+		Sets puppet opmode from message
+		:param msg: Opmode [std_msgs/String]
+		:return: None
+		"""
+		self._set_opmode(msg.data)
+	
+	def _msg_ros_config(self, msg, args):
+		"""
+		Sets puppet config value from message
+		:param msg: Value [std_msgs/Float32]
+		:param args: Setting args
+		:return: None
 		
+		Setting args:
+		args[0] = Joint index [0...6]
+		args[1] = Config name [string]
+		"""
+		joint, setting = args
+		self._set_config(joint, setting, msg.data)
 	
 	def _msg_rx_heartbeat(self, data):
 		"""
