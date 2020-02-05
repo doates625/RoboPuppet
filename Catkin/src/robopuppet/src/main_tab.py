@@ -127,6 +127,10 @@ class MainTab:
 		:return: None
 		"""
 		opmode = self._sv_om.get()
+		if opmode == 'hold':
+			for j in range(num_joints):
+				angle = self._puppet.get_angle(j)
+				self._puppet.set_setpoint(j, angle)
 		self._puppet.set_opmode(opmode)
 	
 	def _make_lb_js(self, parent):

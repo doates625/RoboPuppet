@@ -34,6 +34,7 @@ class SerialInterface:
 	_msg_id_opmode = 0x10
 	_msg_id_joint_state = 0x20
 	_msg_id_joint_config = 0x30
+	_msg_id_joint_setpoint = 0x31
 	_msg_id_gripper = 0x40
 	_config_bytes = {
 		'home_angle': 0x00,
@@ -86,6 +87,7 @@ class SerialInterface:
 		self._server.add_tx(self._msg_id_opmode, 1, self._msg_tx_opmode)
 		self._server.add_rx(self._msg_id_joint_state, 10, self._msg_rx_joint_state)
 		self._server.add_tx(self._msg_id_joint_config, 6, self._msg_tx_joint_config)
+		self._server.add_tx(self._msg_id_joint_setpoint, 5, self._msg_tx_joint_setpoint)
 		self._server.add_rx(self._msg_id_gripper, 5, self._msg_rx_gripper)
 		
 		# TX variables
@@ -106,6 +108,7 @@ class SerialInterface:
 			topics['enc_stat'] = Publisher(tnj + '/enc_stat', String, queue_size=10)
 			topics['angle'] = Publisher(tnj + '/angle', Float32, queue_size=10)
 			topics['voltage'] = Publisher(tnj + '/voltage', Float32, queue_size=10)
+			topics['setpoint'] = Subscriber(tnj + '/setpoint', Float32, self._msg_ros_setpoint, (j,))
 			for name in config_names:
 				topics[name] = Subscriber(tnj + '/' + name, Float32, self._msg_ros_config, (j, name))
 			self._topics['joint'][j] = topics
@@ -221,6 +224,20 @@ class SerialInterface:
 		joint, setting = args
 		self._set_config(joint, setting, msg.data)
 	
+	def _msg_ros_setpoint(self, msg, args):
+		"""
+		Sets joint angle setpoint
+		:param msg: Setpoint [std_msgs/Float32]
+		:param args: Callback args
+		
+		Callback args:
+		args[0] = Joint index [0...6]
+		"""
+		joint, = args
+		self._tx_joint = joint
+		self._tx_value = msg.data
+		self._server.tx(self._msg_id_joint_setpoint)
+	
 	def _msg_rx_heartbeat(self, data):
 		"""
 		Heartbeat RX callback
@@ -290,6 +307,19 @@ class SerialInterface:
 		data[0] = self._tx_joint
 		data[1] = self._config_bytes[self._tx_setting]
 		data[2:6] = [ord(b) for b in pack('f', self._tx_value)]
+	
+	def _msg_tx_joint_setpoint(self, data):
+		"""
+		Joint setpoint TX callback
+		:param data: Message TX data
+		:return: None
+		
+		Data format:
+		[0-0]: Joint number (0-6)
+		[1-4]: Joint setpoint [rad]
+		"""
+		data[0] = self._tx_joint
+		data[1:5] = [ord(b) for b in pack('f', self._tx_value)]
 	
 	def _msg_rx_gripper(self, data):
 		"""

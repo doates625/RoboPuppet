@@ -47,6 +47,7 @@ class ROSInterface:
 			topics['enc_stat'] = Subscriber(tnj + '/enc_stat', String, self._msg_joint, (self._enc_stats, j))
 			topics['angle'] = Subscriber(tnj + '/angle', Float32, self._msg_joint, (self._angles, j))
 			topics['voltage'] = Subscriber(tnj + '/voltage', Float32, self._msg_joint, (self._voltages, j))
+			topics['setpoint'] = Publisher(tnj + '/setpoint', Float32, queue_size=10)
 			for name in config_names:
 				topics[name] = Publisher(tnj + '/' + name, Float32, queue_size=10)
 			self._topics['joint'][j] = topics
@@ -90,6 +91,14 @@ class ROSInterface:
 		:param joint: Joint index [0...6]
 		"""
 		return self._angles[joint]
+	
+	def set_setpoint(self, joint, angle):
+		"""
+		Sets joint angle setpoint
+		:param joint: Joint index [0...6]
+		:param angle: Angle setpoint [rad]
+		"""
+		self._topics['joint'][joint]['setpoint'].publish(Float32(angle))
 	
 	def get_voltage(self, joint):
 		"""

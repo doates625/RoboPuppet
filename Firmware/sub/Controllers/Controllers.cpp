@@ -62,11 +62,10 @@ void Controllers::set_enabled(bool enabled)
 	Controllers::enabled = enabled;
 	if (enabled)
 	{
-		// Reset PIDs and copy setpoints when enabled
+		// Reset PIDs
 		for (uint8_t j = 0; j < num_joints; j++)
 		{
 			controllers[j]->reset();
-			setpoints[j] = Encoders::get_angle(j);
 		}
 	}
 	else

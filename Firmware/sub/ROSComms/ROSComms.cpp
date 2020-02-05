@@ -30,6 +30,7 @@ namespace ROSComms
 	const uint8_t msg_id_opmode = 0x10;
 	const uint8_t msg_id_joint_state = 0x20;
 	const uint8_t msg_id_joint_config = 0x30;
+	const uint8_t msg_id_joint_setpoint = 0x31;
 	const uint8_t msg_id_gripper = 0x40;
 	SerialServer server(serial, start_byte);
 
@@ -38,6 +39,7 @@ namespace ROSComms
 	void msg_rx_opmode(uint8_t* data);
 	void msg_tx_joint_state(uint8_t* data);
 	void msg_rx_joint_config(uint8_t* data);
+	void msg_rx_joint_setpoint(uint8_t* data);
 	void msg_tx_gripper(uint8_t *data);
 	uint8_t tx_j, tx_g;
 
@@ -74,6 +76,7 @@ void ROSComms::init()
 		server.add_rx(msg_id_opmode, 1, msg_rx_opmode);
 		server.add_tx(msg_id_joint_state, 10, msg_tx_joint_state);
 		server.add_rx(msg_id_joint_config, 6, msg_rx_joint_config);
+		server.add_rx(msg_id_joint_setpoint, 5, msg_rx_joint_setpoint);
 		server.add_tx(msg_id_gripper, 5, msg_tx_gripper);
 
 		// Start transmit timers
@@ -171,7 +174,6 @@ void ROSComms::msg_tx_joint_state(uint8_t* data)
  * @param data Message RX data
  * 
  * Data format:
- * 
  * [0-0]: Joint number (0-6)
  * [1-1]: Config ID (enum):
  *        0x00 = Joint home angle [rad]
@@ -212,6 +214,22 @@ void ROSComms::msg_rx_joint_config(uint8_t* data)
 		case 0x0A: Encoders::set_sign(joint, setting); break;
 		case 0x0B: Motors::set_sign(joint, setting); break;
 	}
+}
+
+/**
+ * @brief Sets joint angle setpoint
+ * @param data Message RX data
+ * 
+ * Data format:
+ * [0-0]: Joint number (0-6)
+ * [1-4]: Joint setpoint [rad]
+ */
+void ROSComms::msg_rx_joint_setpoint(uint8_t* data)
+{
+	Struct str(data, Struct::lsb_first);
+	uint8_t joint = (uint8_t)str;
+	float angle = (float)str;
+	Controllers::set_setpoint(joint, angle);
 }
 
 /**
