@@ -21,36 +21,57 @@ class Arm:
 		"""
 		Constructs arm controller node
 		- Enables Baxter
-		- Creates Baxter arm interface
+		- Creates Baxter arm interfaces
 		- Creates RoboPuppet ROS interface
 		"""
 		
 		# Init ROS node
 		rospy.init_node('arm')
-		arm_side = rospy.get_param('~arm_side')
+		self._side = rospy.get_param('~arm_side')
+		self._ctrl_L = True
+		self._ctrl_R = True
 		
 		# Enable Baxter
 		enabler = baxter.RobotEnable(CHECK_VERSION).enable()
 		
-		# Baxter arm interface
-		limb_name = ('left' if arm_side == 'L' else 'right')
-		self._arm = baxter.Limb(limb_name)
-		self._joint_names = self._arm.joint_names()
-		self._joint_angles = dict()
+		# L arm interface
+		self._arm_L = baxter.Limb('left')
+		self._joint_names_L = self._arm_L.joint_names()
+		self._joint_angles_L = dict()
 		for j in range(num_joints):
-			self._joint_angles[self._joint_names[j]] = 0.0
+			self._joint_angles_L[self._joint_names_L[j]] = 0.0
+			
+		# R arm interface
+		self._arm_R = baxter.Limb('right')
+		self._joint_names_R = self._arm_R.joint_names()
+		self._joint_angles_R = dict()
+		for j in range(num_joints):
+			self._joint_angles_R[self._joint_names_R[j]] = 0.0
 		
 		# RoboPuppet ROS interface
-		self._puppet = ROSInterface(arm_side)
+		self._puppet = ROSInterface(self._side)
 	
 	def update(self):
 		"""
 		Converts RoboPuppet joints to Baxter commands
 		:return: None
 		"""
+		
+		# Get joint angles from RoboPuppet
 		for j in range(num_joints):
-			self._joint_angles[self._joint_names[j]] = self._puppet.get_angle(j)
-		self._arm.set_joint_positions(self._joint_angles)
+			angle = self._puppet.get_angle(j)
+			angle_L = -angle if self._side == 'R' and j % 2 == 0 else +angle
+			angle_R = -angle if self._side == 'L' and j % 2 == 0 else +angle
+			self._joint_angles_L[self._joint_names_L[j]] = angle_L
+			self._joint_angles_R[self._joint_names_R[j]] = angle_R
+			
+		# Command L arm
+		if self._ctrl_L:
+			self._arm_L.set_joint_positions(self._joint_angles_L)
+		
+		# Command R arm
+		if self._ctrl_R:
+			self._arm_R.set_joint_positions(self._joint_angles_R)
 
 """
 Main Function
