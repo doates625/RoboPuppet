@@ -28,6 +28,7 @@ class Arm:
 		# Init ROS node
 		rospy.init_node('arm')
 		self._side = rospy.get_param('~arm_side')
+		self._state = 'calibrating'
 		self._ctrl_L = True
 		self._ctrl_R = True
 		
@@ -57,21 +58,36 @@ class Arm:
 		:return: None
 		"""
 		
-		# Get joint angles from RoboPuppet
-		for j in range(num_joints):
-			angle = self._puppet.get_angle(j)
-			angle_L = -angle if self._side == 'R' and j % 2 == 0 else +angle
-			angle_R = -angle if self._side == 'L' and j % 2 == 0 else +angle
-			self._joint_angles_L[self._joint_names_L[j]] = angle_L
-			self._joint_angles_R[self._joint_names_R[j]] = angle_R
+		if self._state == 'calibrating':
 			
-		# Command L arm
-		if self._ctrl_L:
-			self._arm_L.set_joint_positions(self._joint_angles_L)
+			# Check encoder calibrations
+			cal = True
+			for j in range(4):	# TODO make num_joints...
+				if self._puppet.get_enc_stat(j) != 'Working':
+					cal = False
+					break
+			
+			# State transition
+			if cal:
+				self._state = 'enabled'
+			
+		elif self._state == 'enabled':
+			
+			# Get joint angles from RoboPuppet
+			for j in range(num_joints):
+				angle = self._puppet.get_angle(j)
+				angle_L = -angle if self._side == 'R' and j % 2 == 0 else +angle
+				angle_R = -angle if self._side == 'L' and j % 2 == 0 else +angle
+				self._joint_angles_L[self._joint_names_L[j]] = angle_L
+				self._joint_angles_R[self._joint_names_R[j]] = angle_R
+			
+			# Command L arm
+			if self._ctrl_L:
+				self._arm_L.set_joint_positions(self._joint_angles_L)
 		
-		# Command R arm
-		if self._ctrl_R:
-			self._arm_R.set_joint_positions(self._joint_angles_R)
+			# Command R arm
+			if self._ctrl_R:
+				self._arm_R.set_joint_positions(self._joint_angles_R)
 
 """
 Main Function
