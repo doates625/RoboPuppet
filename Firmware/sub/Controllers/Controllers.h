@@ -12,6 +12,8 @@ namespace Controllers
 	void init();
 	void set_enabled(bool enabled);
 	void update();
+
+	// Getters
 	float get_voltage(uint8_t joint);
 
 	// Config methods

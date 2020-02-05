@@ -67,6 +67,10 @@ class JointTab:
 		self._make_fr_cfg(self._fr)
 		self._make_lb_cfg(self._fr_cfg)
 		self._make_cfgs(self._fr_cfg)
+		self._make_setpt(self._fr_cfg)
+		
+		# Populate text entries
+		self._bt_get_cb()
 	
 	def _make_fr_plt(self, parent):
 		"""
@@ -192,13 +196,29 @@ class JointTab:
 		# Set columns to expand
 		for c in range(2):
 			Grid.columnconfigure(parent, c, weight=1)
+	
+	def _make_setpt(self, parent):
+		"""
+		Creates setpoint label and entry
+		:param parent: Parent frame
+		:return: None
+		"""
 		
-		# Populate config text fields
-		self._bt_get_cb()
+		# Grid row
+		row = len(config_names) + 3
+		
+		# Make label
+		self._lb_setpt = Label(parent, text='setpoint')
+		self._lb_setpt.grid(row=row, column=0, sticky='NSEW')
+		
+		# Make entry
+		self._sv_setpt = StringVar();
+		self._et_setpt = Entry(parent, textvariable=self._sv_setpt)
+		self._et_setpt.grid(row=row, column=1, sticky='NSEW')
 	
 	def _bt_get_cb(self):
 		"""
-		Updates config text fields with current config values
+		Updates config and setpoint text fields
 		:return: None
 		"""
 		configs = self._puppet.get_configs(self._joint)
@@ -214,12 +234,15 @@ class JointTab:
 		self._cfg_svs['pid_kd'].set(config_fmt % configs.pid_kd)
 		self._cfg_svs['sign_angle'].set(config_fmt % configs.sign_angle)
 		self._cfg_svs['sign_motor'].set(config_fmt % configs.sign_motor)
+		self._sv_setpt.set('')
 	
 	def _bt_set_cb(self):
 		"""
 		Updates robopuppet with configs in all text fields
 		:return: None
 		"""
+		
+		# Config settings
 		for name in config_names:
 			svar = self._cfg_svs[name]
 			try:
@@ -227,6 +250,15 @@ class JointTab:
 				self._puppet.set_config(self._joint, name, value)
 			except ValueError:
 				pass
+		
+		# Joint setpoint
+		try:
+			angle = float(self._sv_setpt.get())
+			self._puppet.set_setpoint(self._joint, angle)
+		except ValueError:
+			pass
+				
+		# Update entries
 		self._bt_get_cb()
 	
 	def update(self):
