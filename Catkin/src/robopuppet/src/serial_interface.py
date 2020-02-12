@@ -13,6 +13,9 @@ from std_msgs.msg import Empty
 from std_msgs.msg import String
 from std_msgs.msg import UInt8
 from std_msgs.msg import Float32
+from baxter_interface import RobotEnable
+from baxter_interface import CHECK_VERSION
+from baxter_interface import Limb
 from robopuppet.srv import GetConfig
 from constants import num_joints
 from constants import num_grippers
@@ -100,6 +103,12 @@ class SerialInterface:
 		self._tx_setting = None
 		self._tx_value = None
 		
+		# Baxter interface
+		RobotEnable(CHECK_VERSION).enable()
+		bax_side = 'left' if arm_side == 'L' else 'right'
+		self._bax_arm = Limb(bax_side)
+		self._bax_joint_names = self._bax_arm.joint_names()
+		
 		# ROS topics
 		self._topics = dict()
 		tn = '/puppet/arm_' + arm_side
@@ -180,9 +189,26 @@ class SerialInterface:
 		Opmode options:
 		'limp' - Motors disabled
 		'hold' - Gravity compensation
+		
+		Commands puppet to baxter pose when 'hold'
 		"""
+		if opmode == 'hold':
+			bax_angles = self._bax_arm.joint_angles()
+			for j in range(num_joints):
+				angle = bax_angles[self._bax_joint_names[j]]
+				self._set_setpoint(j, angle)
 		self._tx_opmode = opmode
 		self._server.tx(self._msg_id_opmode)
+	
+	def _set_setpoint(self, joint, angle):
+		"""
+		Sets joint setpoint
+		:param joint: Joint index [0...6]
+		:param angle: Angle setpoint [rad]
+		"""
+		self._tx_joint = joint
+		self._tx_value = angle
+		self._server.tx(self._msg_id_joint_setpoint)
 	
 	def _set_config(self, joint, setting, value):
 		"""
@@ -242,9 +268,7 @@ class SerialInterface:
 		args[0] = Joint index [0...6]
 		"""
 		joint, = args
-		self._tx_joint = joint
-		self._tx_value = msg.data
-		self._server.tx(self._msg_id_joint_setpoint)
+		self._set_setpoint(joint, msg.data)
 	
 	def _msg_rx_heartbeat(self, data):
 		"""
