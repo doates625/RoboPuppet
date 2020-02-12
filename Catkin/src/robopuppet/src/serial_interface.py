@@ -11,6 +11,7 @@ from rospy import Publisher
 from rospy import Subscriber
 from std_msgs.msg import Empty
 from std_msgs.msg import String
+from std_msgs.msg import Uint8
 from std_msgs.msg import Float32
 from robopuppet.srv import GetConfig
 from constants import num_joints
@@ -36,6 +37,7 @@ class SerialInterface:
 	_msg_id_joint_config = 0x30
 	_msg_id_joint_setpoint = 0x31
 	_msg_id_gripper = 0x40
+	_msg_id_buttons = 0x41
 	_config_bytes = {
 		'home_angle': 0x00,
 		'angle_min': 0x01,
@@ -79,6 +81,7 @@ class SerialInterface:
 		self._angles = [0.0] * num_joints
 		self._voltages = [0.0] * num_joints
 		self._grippers = [0.0] * num_grippers
+		self._user_btn = 0
 		
 		# Serial Server
 		self._serial = Serial(port=port_name, baudrate=baud_rate, timeout=1.0)
@@ -89,6 +92,7 @@ class SerialInterface:
 		self._server.add_tx(self._msg_id_joint_config, 6, self._msg_tx_joint_config)
 		self._server.add_tx(self._msg_id_joint_setpoint, 5, self._msg_tx_joint_setpoint)
 		self._server.add_rx(self._msg_id_gripper, 5, self._msg_rx_gripper)
+		self._server.add_rx(self._msg_id_buttons, 1, self._msg_rx_buttons)
 		
 		# TX variables
 		self._tx_opmode = None
@@ -116,6 +120,7 @@ class SerialInterface:
 		for g in range(num_grippers):
 			tng = tn + '/gripper_' + str(g)
 			self._topics['gripper'][g] = Publisher(tng, Float32, queue_size=10)
+		self._topics['user_btn'] = Publisher(tn + '/user_btn', Uint8, queue_size=10)
 		
 		# Load settings from config
 		name = 'get_config_' + arm_side
@@ -163,6 +168,9 @@ class SerialInterface:
 		# Pub grippers
 		for g in range(num_grippers):
 			self._topics['gripper'][g].publish(Float32(self._grippers[g]))
+		
+		# Pub user button
+		self._topics['user_btn'].publish(Uint8(self._user_btn))
 	
 	def _set_opmode(self, opmode):
 		"""
@@ -334,6 +342,17 @@ class SerialInterface:
 		index = data[0]
 		reading = unpack('f', bytearray(data[1:5]))[0]
 		self._grippers[index] = reading
+	
+	def _msg_rx_buttons(self, data):
+		"""
+		User button RX callback
+		:param data: Message RX data
+		:return: None
+		
+		Data format
+		[0-0]: Button ID (1-4, 0 = no press)
+		"""
+		self._user_btn = data[0]
 
 """
 Main Function

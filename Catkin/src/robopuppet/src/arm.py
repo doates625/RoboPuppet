@@ -58,6 +58,12 @@ class Arm:
 		:return: None
 		"""
 		
+		# Control enable state machine
+		btn = self._puppet.get_user_btn()
+		if btn == 2: self._ctrl_L = not self._ctrl_L
+		if btn == 3: self._ctrl_R = not self._ctrl_R
+		
+		# Arm control state machine
 		if self._state == 'calibrating':
 			
 			# Check encoder calibrations

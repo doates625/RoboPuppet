@@ -11,6 +11,7 @@ from rospy import Subscriber
 from std_msgs.msg import Empty
 from std_msgs.msg import Bool
 from std_msgs.msg import String
+from std_msgs.msg import Uint8
 from std_msgs.msg import Float32
 from robopuppet.srv import GetConfig
 from constants import num_joints
@@ -34,6 +35,8 @@ class ROSInterface:
 		self._angles = [0.0] * num_joints
 		self._voltages = [0.0] * num_joints
 		self._grippers = [0.0] * num_grippers
+		self._user_btn = 0
+		self._user_btn_prev = 0
 		
 		# ROS topics
 		self._topics = dict()
@@ -55,6 +58,7 @@ class ROSInterface:
 		for g in range(num_grippers):
 			tng = tn + '/gripper_' + str(g)
 			self._topics['gripper'][g] = Subscriber(tng, Float32, self._msg_gripper, (g,))
+		self._topics['user_btn'] = Subscriber(tn + '/user_btn', Uint8, self._msg_button)
 		
 		# Config service proxy
 		name = 'get_config_' + side
@@ -113,6 +117,19 @@ class ROSInterface:
 		:param index: Gripper index [0...3]
 		"""
 		return self._grippers[index]
+	
+	def get_user_btn(self):
+		"""
+		Return user button rising edge reading
+		1-4 = Rising edge ID
+		None = No rising edge
+		"""
+		if self._user_btn != self._user_btn_prev:
+			btn_edge = self._user_btn
+		else:
+			btn_edge = None
+		self._user_btn_prev = self._user_btn
+		return btn_edge
 		
 	def set_config(self, joint, setting, value):
 		"""
@@ -174,3 +191,10 @@ class ROSInterface:
 		index, = args
 		self._grippers[index] = msg.data
 
+	def _msg_button(self, msg)
+		"""
+		Updates user button reading
+		:param msg: Button ID [1-4, 0 = no press, Uint8]
+		:return: None
+		"""
+		self._user_btn = msg.data if msg.data > 0 else None
