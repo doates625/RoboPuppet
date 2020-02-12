@@ -11,7 +11,7 @@ from rospy import Publisher
 from rospy import Subscriber
 from std_msgs.msg import Empty
 from std_msgs.msg import String
-from std_msgs.msg import Uint8
+from std_msgs.msg import UInt8
 from std_msgs.msg import Float32
 from robopuppet.srv import GetConfig
 from constants import num_joints
@@ -120,7 +120,7 @@ class SerialInterface:
 		for g in range(num_grippers):
 			tng = tn + '/gripper_' + str(g)
 			self._topics['gripper'][g] = Publisher(tng, Float32, queue_size=10)
-		self._topics['user_btn'] = Publisher(tn + '/user_btn', Uint8, queue_size=10)
+		self._topics['user_btn'] = Publisher(tn + '/user_btn', UInt8, queue_size=10)
 		
 		# Load settings from config
 		name = 'get_config_' + arm_side
@@ -170,7 +170,7 @@ class SerialInterface:
 			self._topics['gripper'][g].publish(Float32(self._grippers[g]))
 		
 		# Pub user button
-		self._topics['user_btn'].publish(Uint8(self._user_btn))
+		self._topics['user_btn'].publish(UInt8(self._user_btn))
 	
 	def _set_opmode(self, opmode):
 		"""

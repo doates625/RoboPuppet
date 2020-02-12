@@ -29,8 +29,8 @@ class Arm:
 		rospy.init_node('arm')
 		self._side = rospy.get_param('~arm_side')
 		self._state = 'calibrating'
-		self._ctrl_L = True
-		self._ctrl_R = True
+		self._ctrl_L = False
+		self._ctrl_R = False
 		
 		# Enable Baxter
 		enabler = baxter.RobotEnable(CHECK_VERSION).enable()

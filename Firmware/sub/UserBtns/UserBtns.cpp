@@ -27,7 +27,7 @@ namespace UserBtns
  */
 uint8_t UserBtns::get()
 {
-	float volt = btns.read();
+	float volt = 3.3f * btns.read();
 	if (volt < 0.25f) return 1;
 	else if (volt < 0.75f) return 2;
 	else if (volt < 1.25f) return 3;
