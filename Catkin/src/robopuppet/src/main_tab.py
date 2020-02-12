@@ -118,16 +118,6 @@ class MainTab:
 			self._rbs_om[name] = Radiobutton(
 				parent, text=name, variable=self._sv_om, value=name, indicatoron=0)
 			self._rbs_om[name].pack(side='left', expand=True, fill='both')
-		self._sv_om.trace('w', self._opmode_cb)
-	
-	def _opmode_cb(self, *argv):
-		"""
-		Sends opmode command to RoboPuppet when radio button changes
-		:param argv: Unused callback requirement
-		:return: None
-		"""
-		opmode = self._sv_om.get()
-		self._puppet.set_opmode(opmode)
 	
 	def _make_lb_js(self, parent):
 		"""
@@ -250,4 +240,7 @@ class MainTab:
 			for g in range(num_grippers):
 				reading = self._puppet.get_gripper(g)
 				self._lbs_gs[g]['value'].config(text=('%.2f' % reading))
-
+			
+			# Synchronize mode toggle
+			opmode = self._puppet.get_opmode()
+			self._sv_om.set(opmode)
