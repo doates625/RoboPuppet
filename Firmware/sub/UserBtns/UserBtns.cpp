@@ -10,7 +10,7 @@
  */
 namespace UserBtns
 {
-	const uint8_t pin_btns = 0;	// TODO fix
+	const uint8_t pin_btns = 20;
 	AnalogIn btns(pin_btns);
 }
 
