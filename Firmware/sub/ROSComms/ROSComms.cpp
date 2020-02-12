@@ -9,6 +9,7 @@
 #include <Encoders.h>
 #include <AngleFilters.h>
 #include <Grippers.h>
+#include <UserBtns.h>
 #include <SerialServer.h>
 #include <Struct.h>
 #include <Timer.h>
@@ -32,6 +33,7 @@ namespace ROSComms
 	const uint8_t msg_id_joint_config = 0x30;
 	const uint8_t msg_id_joint_setpoint = 0x31;
 	const uint8_t msg_id_gripper = 0x40;
+	const uint8_t msg_id_buttons = 0x41;
 	SerialServer server(serial, start_byte);
 
 	// Server callbacks
@@ -41,6 +43,7 @@ namespace ROSComms
 	void msg_rx_joint_config(uint8_t* data);
 	void msg_rx_joint_setpoint(uint8_t* data);
 	void msg_tx_gripper(uint8_t *data);
+	void msg_tx_buttons(uint8_t *data);
 	uint8_t tx_j, tx_g;
 
 	// Transmit timers
@@ -78,6 +81,7 @@ void ROSComms::init()
 		server.add_rx(msg_id_joint_config, 6, msg_rx_joint_config);
 		server.add_rx(msg_id_joint_setpoint, 5, msg_rx_joint_setpoint);
 		server.add_tx(msg_id_gripper, 5, msg_tx_gripper);
+		server.add_tx(msg_id_buttons, 1, msg_tx_buttons);
 
 		// Start transmit timers
 		timer_heartbeat.start();
@@ -120,6 +124,9 @@ void ROSComms::update()
 		{
 			server.tx(msg_id_gripper);
 		}
+
+		// Transmit user buttons
+		server.tx(msg_id_buttons);
 	}
 }
 
@@ -244,4 +251,16 @@ void ROSComms::msg_tx_gripper(uint8_t *data)
 {
 	Struct str(data, Struct::lsb_first);
 	str << tx_g << Grippers::get(tx_g);
+}
+
+/**
+ * @brief Packs user buttons message
+ * @param data Message TX data pointer
+ * 
+ * Data format:
+ * [0-0]: Button ID (1-4, 0 = no press)
+ */
+void ROSComms::msg_tx_buttons(uint8_t *data)
+{
+	data[0] = UserBtns::get();
 }
