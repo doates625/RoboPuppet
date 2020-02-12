@@ -31,6 +31,7 @@ class ROSInterface:
 		"""
 		
 		# State data
+		self._opmode = 'limp'
 		self._enc_stats = ['Unknown'] * num_joints
 		self._angles = [0.0] * num_joints
 		self._voltages = [0.0] * num_joints
@@ -42,7 +43,8 @@ class ROSInterface:
 		self._topics = dict()
 		tn = '/puppet/arm_' + side
 		self._topics['heartbeat'] = Subscriber(tn + '/heartbeat', Empty, self._msg_heartbeat)
-		self._topics['opmode'] = Publisher(tn + '/opmode', String, queue_size=10)
+		self._topics['opmode_set'] = Publisher(tn + '/opmode', String, queue_size=10)
+		self._topics['opmode_get'] = Subscriber(tn + '/opmode', String, self._msg_opmode)
 		self._topics['joint'] = dict()
 		for j in range(num_joints):
 			tnj = tn + '/joint_' + str(j)
@@ -73,6 +75,12 @@ class ROSInterface:
 		Returns time since last heartbeat [s]
 		"""
 		return time() - self._last_heartbeat_time
+	
+	def get_opmode(self):
+		"""
+		Gets arm opmode [string]
+		"""
+		return self._opmode
 		
 	def set_opmode(self, opmode):
 		"""
@@ -80,7 +88,8 @@ class ROSInterface:
 		:param opmode: 'limp' or 'hold'
 		:return: None
 		"""
-		self._topics['opmode'].publish(String(opmode))
+		self._opmode = opmode
+		self._topics['opmode_set'].publish(String(self._opmode))
 	
 	def get_enc_stat(self, joint):
 		"""
@@ -170,6 +179,14 @@ class ROSInterface:
 		:return: None
 		"""
 		self._last_heartbeat_time = time()
+	
+	def _msg_opmode(self, msg):
+		"""
+		Updates opmode
+		:param msg: New opmode [String]
+		:return: None
+		"""
+		self._opmode = msg.data
 	
 	def _msg_joint(self, msg, args):
 		"""

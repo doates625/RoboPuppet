@@ -58,10 +58,12 @@ class Arm:
 		:return: None
 		"""
 		
-		# Control enable state machine
+		# Arm control enable state machines
 		btn = self._puppet.get_user_btn()
-		if btn == 2: self._ctrl_L = not self._ctrl_L
-		if btn == 3: self._ctrl_R = not self._ctrl_R
+		if btn == 2:
+			self._ctrl_L = not self._ctrl_L
+		if btn == 3:
+			self._ctrl_R = not self._ctrl_R
 		
 		# Arm control state machine
 		if self._state == 'calibrating':
@@ -78,6 +80,13 @@ class Arm:
 				self._state = 'enabled'
 			
 		elif self._state == 'enabled':
+		
+			# Hold mode check
+			if btn == 1:
+				opmode = self._puppet.get_opmode()
+				if opmode == 'limp': opmode = 'hold'
+				elif opmode == 'hold': opmode = 'limp'
+				self._puppet.set_opmode(opmode)
 			
 			# Get joint angles from RoboPuppet
 			for j in range(num_joints):
