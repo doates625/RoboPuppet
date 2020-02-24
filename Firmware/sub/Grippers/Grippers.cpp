@@ -28,6 +28,7 @@ void Grippers::init()
 		for (uint8_t g = 0; g < num_grippers; g++)
 		{
 			grippers[g] = new AnalogIn(pins[g]);
+			pinMode(pins[g], INPUT_PULLUP);
 		}
 
 		// Set init flag
