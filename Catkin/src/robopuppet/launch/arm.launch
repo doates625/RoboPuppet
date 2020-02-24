@@ -23,12 +23,6 @@
 		<param name="comm_rate" type="double" value="$(arg comm_rate)"/>
 	</node>
 	
-	<!-- Gripper Controller -->
-	<node pkg="robopuppet" type="gripper.py" name="gripper_$(arg arm_side)" output="screen">
-		<param name="arm_side" type="str" value="$(arg arm_side)"/>
-		<param name="comm_rate" type="double" value="$(arg comm_rate)"/>
-	</node>
-	
 	<!-- Arm Controller -->
 	<node pkg="robopuppet" type="arm.py" name="arm_$(arg arm_side)" output="screen">
 		<param name="arm_side" type="str" value="$(arg arm_side)"/>

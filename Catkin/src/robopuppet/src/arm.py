@@ -2,7 +2,7 @@
 
 """
 arm.py
-RoboPuppet Baxter arm control node
+RoboPuppet Baxter arm and gripper control node
 Written by Dan Oates (WPI Class of 2020)
 """
 
@@ -35,19 +35,23 @@ class Arm:
 		# Enable Baxter
 		enabler = baxter.RobotEnable(CHECK_VERSION).enable()
 		
-		# L arm interface
+		# L arm interfaces
 		self._arm_L = baxter.Limb('left')
 		self._joint_names_L = self._arm_L.joint_names()
 		self._joint_angles_L = dict()
 		for j in range(num_joints):
 			self._joint_angles_L[self._joint_names_L[j]] = 0.0
+		self._grip_L = baxter.Gripper('left')
+		self._grip_L.open()
 			
-		# R arm interface
+		# R arm interfaces
 		self._arm_R = baxter.Limb('right')
 		self._joint_names_R = self._arm_R.joint_names()
 		self._joint_angles_R = dict()
 		for j in range(num_joints):
 			self._joint_angles_R[self._joint_names_R[j]] = 0.0
+		self._grip_R = baxter.Gripper('right')
+		self._grip_R.open()
 		
 		# RoboPuppet ROS interface
 		self._puppet = ROSInterface(self._side)
@@ -96,13 +100,18 @@ class Arm:
 				self._joint_angles_L[self._joint_names_L[j]] = angle_L
 				self._joint_angles_R[self._joint_names_R[j]] = angle_R
 			
+			# Get gripper status from buttons
+			close_grips = self._puppet.get_gripper(3) < 0.5
+			
 			# Command L arm
 			if self._ctrl_L:
 				self._arm_L.set_joint_positions(self._joint_angles_L)
+				self._grip_L.close() if close_grips else self._grip_L.open()
 		
 			# Command R arm
 			if self._ctrl_R:
 				self._arm_R.set_joint_positions(self._joint_angles_R)
+				self._grip_R.close() if close_grips else self._grip_R.open()
 
 """
 Main Function
