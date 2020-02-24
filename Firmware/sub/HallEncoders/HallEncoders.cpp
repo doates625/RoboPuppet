@@ -23,7 +23,7 @@ namespace HallEncoders
 	{
 		0x44,	// Joint 1
 		0x48,	// Joint 3
-		0x40,	// Joint 5
+		0x4C,	// Joint 5
 	};
 	enc_stat_t enc_stats[num_encs] =
 	{

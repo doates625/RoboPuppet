@@ -39,7 +39,7 @@ class Gripper:
 		Updates gripper command with new reading(s)
 		:return: None
 		"""
-		if self._puppet.get_gripper(0) > 0.5:
+		if self._puppet.get_gripper(3) < 0.5:
 			self._gripper.close()
 		else:
 			self._gripper.open()
