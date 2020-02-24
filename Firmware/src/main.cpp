@@ -8,6 +8,7 @@
 #include <Encoders.h>
 #include <AngleFilters.h>
 #include <Grippers.h>
+#include <PowerSupply.h>
 #include <Motors.h>
 #include <Controllers.h>
 #include <ROSComms.h>
@@ -51,6 +52,7 @@ void setup()
 	Encoders::init();
 	AngleFilters::init();
 	Controllers::init();
+	PowerSupply::init();
 	ROSComms::init();
 
 	// Start control ISR
