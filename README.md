@@ -47,7 +47,7 @@ catkin_make
 ```
 - Open Baxter startup script:
 ```
-gedit baxter/baxter.sh
+gedit src/baxter/baxter.sh
 ```
 - Change 'your_ip' on line 26 to "127.0.0.1"
 - Change 'ros_version' on line 30 to "kinetic"
