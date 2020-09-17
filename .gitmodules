@@ -4,9 +4,6 @@
 [submodule "Firmware/lib/AS5048B"]
 	path = Firmware/lib/AS5048B
 	url = https://github.com/doates625/AS5048B.git
-[submodule "Firmware/lib/ClampLimiter"]
-	path = Firmware/lib/ClampLimiter
-	url = https://github.com/doates625/ClampLimiter.git
 [submodule "Firmware/lib/CppUtil"]
 	path = Firmware/lib/CppUtil
 	url = https://github.com/doates625/CppUtil.git
