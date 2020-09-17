@@ -43,3 +43,6 @@
 [submodule "Firmware/lib/Timer"]
 	path = Firmware/lib/Timer
 	url = https://github.com/doates625/Timer.git
+[submodule "Firmware/lib/ClampLimiter"]
+	path = Firmware/lib/ClampLimiter
+	url = https://github.com/doates625/ClampLimiter
